@@ -1,0 +1,33 @@
+﻿@model UrunSatisPortali.Models.Product
+
+@{
+    ViewData["Title"] = "Ürünü Sil";
+}
+
+<h1>Ürünü Sil</h1>
+
+<h3>Bu ürünü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</h3>
+<div>
+    <h4>Ürün Bilgileri</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">
+            Ürün Adı
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class="col-sm-3">
+            Fiyat
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Price)
+        </dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Evet, Sil" class="btn btn-danger" /> |
+        <a asp-action="Index">Listeye Geri Dön</a>
+    </form>
+</div>
