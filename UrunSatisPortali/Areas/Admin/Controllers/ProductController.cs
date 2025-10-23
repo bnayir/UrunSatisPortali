@@ -75,28 +75,20 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
             return View(product);
         }
 
+        [HttpPost]
         public IActionResult Delete(int id)
         {
             var product = _productRepo.GetById(id);
             if (product == null)
             {
-                return NotFound();
+                return Json(new { success = false, message = "Hata: Ürün bulunamadı." });
             }
-            return View(product);
+
+            _productRepo.Delete(product);
+
+            return Json(new { success = true, message = "Ürün başarıyla silindi." });
         }
 
-        [HttpPost, ActionName("Delete")] 
-        [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
-        {
-            var product = _productRepo.GetById(id);
-            if (product != null)
-            {
-                _productRepo.Delete(product);
-            }
-            return RedirectToAction(nameof(Index));
-        }
 
-       
     }
 }

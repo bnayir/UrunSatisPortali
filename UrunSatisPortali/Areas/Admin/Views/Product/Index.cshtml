@@ -28,10 +28,40 @@
                 <td>@item.Price</td>
                 <td>@item.Stock</td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Düzenle</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Sil</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Düzenle</a>
+                    <button data-id="@item.Id" class="btn btn-danger btn-sm js-delete">Sil</button>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $(".js-delete").on("click", function () {
+                var btn = $(this); 
+
+                var confirmation = confirm("Bu ürünü silmek istediğinizden emin misiniz?");
+
+                if (confirmation) {
+                    $.ajax({
+                        url: "/Admin/Product/Delete/" + btn.data("id"),  
+                        method: "POST",
+                        success: function (response) {
+                            if (response.success) {
+                                btn.closest("tr").fadeOut(500, function () {
+                                    $(this).remove();
+                                });
+                                alert(response.message);                           } else {
+                                alert(response.message); 
+                            }
+                        },
+                        error: function () {
+                            alert("Bir hata oluştu.");
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}
