@@ -9,7 +9,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 // Repository servisini DI Container'a ekliyoruz.
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-
+// Cookie bazlý kimlik doðrulama servisini ekliyoruz.
+builder.Services.AddAuthentication("MyCookieAuth").AddCookie("MyCookieAuth", options =>
+{
+    options.Cookie.Name = "MyCookieAuth";
+    options.LoginPath = "/Account/Login"; // Kullanýcý giriþ yapmamýþsa yönlendirilecek sayfa
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -24,7 +29,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseAuthentication(); 
 app.UseAuthorization();
 
 app.MapControllerRoute(

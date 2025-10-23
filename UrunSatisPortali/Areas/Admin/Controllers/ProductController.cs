@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering; 
 using UrunSatisPortali.Data;
 using UrunSatisPortali.Models;
 
 namespace UrunSatisPortali.Areas.Admin.Controllers
 {
+    [Authorize]
     [Area("Admin")]
     public class ProductController : Controller
     {
