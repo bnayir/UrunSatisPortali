@@ -1,4 +1,6 @@
-﻿namespace UrunSatisPortali.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace UrunSatisPortali.Models
 {
     public class Product
     {
@@ -7,8 +9,15 @@
         public string Description { get; set; }
         public decimal Price { get; set; }
         public int Stock { get; set; }
-        public string? ImageUrl { get; set; }
+        public string? Image { get; set; }
 
+        [Display(Name = "Aktif mi?")]
+        public bool IsActive { get; set; }
+        [Display(Name = "Kayıt Tarihi")]
+        public DateTime CreatedDate { get; set; } = DateTime.Now; // Varsayılan olarak şu an
+
+        [Display(Name = "Güncelleme Tarihi")]
+        public DateTime? UpdatedDate { get; set; }
         // Foreign Key ve Navigation Property
         public int CategoryId { get; set; }
         public Category Category { get; set; }

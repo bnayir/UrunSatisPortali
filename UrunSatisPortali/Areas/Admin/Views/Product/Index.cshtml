@@ -1,67 +1,170 @@
 ﻿@model IEnumerable<UrunSatisPortali.Models.Product>
 
 @{
-    ViewData["Title"] = "Ürünler";
+    ViewData["Title"] = "Ürün Yönetimi";
 }
 
-<h1>Ürünler</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Ürün Listesi</h1>
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Yeni Ürün Ekle
+    </a>
+</div>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Yeni Ürün Ekle</a>
-</p>
-<table class="table">
-    <thead>
+<table class="table table-bordered table-striped table-hover">
+    <thead class="table-dark">
         <tr>
-            <th>ID</th>
+            <th>Resim</th>
             <th>Ürün Adı</th>
+            <th>Kategori</th>
             <th>Fiyat</th>
             <th>Stok</th>
-            <th></th>
+            <th>Durum</th>
+            <th>Kayıt Tarihi</th>
+            <th>İşlemler</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.Id</td>
+                <td style="width: 80px;">
+                    @if (!string.IsNullOrEmpty(item.Image))
+                    {
+                        <img src="@item.Image"
+                             onclick="showImage('@item.Image')"
+                             width="50" height="50"
+                             style="object-fit:cover; border-radius:5px; border:1px solid #ddd; cursor:pointer;"
+                             title="Büyütmek için tıkla" />
+                    }
+                    else
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                </td>
+
                 <td>@item.Name</td>
-                <td>@item.Price</td>
-                <td>@item.Stock</td>
+
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Düzenle</a>
-                    <button data-id="@item.Id" class="btn btn-danger btn-sm js-delete">Sil</button>
+                    @if (item.Category != null)
+                    {
+                        <span class="badge bg-info text-dark">@item.Category.Name</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                </td>
+
+                <td>@item.Price ₺</td>
+                <td>@item.Stock</td>
+
+                <td>
+                    @if (item.IsActive)
+                    {
+                        <span class="badge bg-success">Aktif</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Pasif</span>
+                    }
+                </td>
+
+                <td>@item.CreatedDate.ToShortDateString()</td>
+
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit"></i> Düzenle
+                    </a>
+
+                    <button class="btn btn-danger btn-sm js-delete" data-id="@item.Id" data-name="@item.Name">
+                        <i class="fas fa-trash"></i> Sil
+                    </button>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+<div class="modal fade" id="imageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ürün Resmi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalImage" src="" style="max-width:100%; height:auto; border-radius:5px;" />
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
+        // 1. Resmi Büyütme Fonksiyonu
+        function showImage(url) {
+            $("#modalImage").attr("src", url);
+            $("#imageModal").modal("show");
+        }
+
+        // 2. AJAX Silme Logiği (SweetAlert ile)
         $(document).ready(function () {
+
             $(".js-delete").on("click", function () {
-                var btn = $(this); 
+                var btn = $(this);
+                var id = btn.data("id");
+                var name = btn.data("name"); // Ürün adını alalım
 
-                var confirmation = confirm("Bu ürünü silmek istediğinizden emin misiniz?");
+                // SweetAlert ile emin misin diye sor
+                Swal.fire({
+                    title: 'Emin misiniz?',
+                    text: "'" + name + "' ürününü silmek üzeresiniz. Bu işlem geri alınamaz!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Evet, Sil!',
+                    cancelButtonText: 'İptal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Kullanıcı onayladıysa AJAX çağrısı yap
+                        $.ajax({
+                            url: "/Admin/Product/Delete/" + id,
+                            method: "POST",
+                            success: function (response) {
+                                if (response.success) {
+                                    // 1. Satırı animasyonla sil
+                                    btn.closest("tr").fadeOut(500, function() {
+                                        $(this).remove();
+                                    });
 
-                if (confirmation) {
-                    $.ajax({
-                        url: "/Admin/Product/Delete/" + btn.data("id"),  
-                        method: "POST",
-                        success: function (response) {
-                            if (response.success) {
-                                btn.closest("tr").fadeOut(500, function () {
-                                    $(this).remove();
-                                });
-                                alert(response.message);                           } else {
-                                alert(response.message); 
+                                    // 2. SweetAlert ile BAŞARI mesajı çıkar
+                                    Swal.fire(
+                                        'Silindi!',
+                                        response.message,
+                                        'success'
+                                    )
+                                } else {
+                                    // Hata varsa
+                                    Swal.fire(
+                                        'Hata!',
+                                        response.message,
+                                        'error'
+                                    )
+                                }
+                            },
+                            error: function () {
+                                Swal.fire(
+                                    'Hata!',
+                                    'Sunucuya ulaşırken bir hata oluştu.',
+                                    'error'
+                                )
                             }
-                        },
-                        error: function () {
-                            alert("Bir hata oluştu.");
-                        }
-                    });
-                }
-            });
-        });
+                        });
+                    }
+                }) // SweetAlert.then bitişi
+            }); // js-delete click bitişi
+        }); // document.ready bitişi
     </script>
 }

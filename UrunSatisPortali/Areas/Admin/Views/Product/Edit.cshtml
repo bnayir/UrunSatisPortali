@@ -6,55 +6,97 @@
 
 <h1>Ürünü Düzenle</h1>
 <hr />
+
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
+    <div class="col-md-8">
+        <form asp-action="Edit" method="post">
+
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <input type="hidden" asp-for="Id" />
-
-            <div class="form-group mb-2">
-                <label asp-for="Name" class="control-label">Ürün Adı</label>
+            <input type="hidden" asp-for="CreatedDate" />
+            <div class="form-group mb-3">
+                <label asp-for="Name" class="form-label">Ürün Adı</label>
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
-            <div class="form-group mb-2">
-                <label asp-for="Description" class="control-label">Açıklama</label>
-                <textarea asp-for="Description" class="form-control"></textarea>
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-2">
-                <label asp-for="Price" class="control-label">Fiyat</label>
-                <input asp-for="Price" class="form-control" />
-                <span asp-validation-for="Price" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-2">
-                <label asp-for="Stock" class="control-label">Stok Adedi</label>
-                <input asp-for="Stock" class="form-control" />
-                <span asp-validation-for="Stock" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-2">
-                <label asp-for="ImageUrl" class="control-label">Görsel URL</label>
-                <input asp-for="ImageUrl" class="form-control" />
-                <span asp-validation-for="ImageUrl" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-2">
-                <label asp-for="CategoryId" class="control-label">Kategori</label>
-                <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories"></select>
-                <span asp-validation-for="CategoryId" class="text-danger"></span>
+
+            <div class="form-group mb-3">
+                <label asp-for="Description" class="form-label">Açıklama</label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
             </div>
 
-            <div class="form-group mt-3">
-                <input type="submit" value="Güncelle" class="btn btn-success" />
+            <div class="form-group mb-3">
+                <label asp-for="Price" class="form-label">Fiyat</label>
+                <input asp-for="Price" class="form-control" type="number" step="0.01" />
             </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Stock" class="form-label">Stok Adedi</label>
+                <input asp-for="Stock" class="form-control" />
+            </div>
+
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" asp-for="IsActive" id="activeCheck">
+                <label class="form-check-label" for="activeCheck">
+                    @Html.DisplayNameFor(model => model.IsActive)
+                </label>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Image" class="form-label">Resim URL (Link)</label>
+                <input asp-for="Image" class="form-control" placeholder="/images/urun.jpg veya http://..." />
+                <span asp-validation-for="Image" class="text-danger"></span>
+
+                @if (!string.IsNullOrEmpty(Model.Image))
+                {
+                    <div class="mt-2">
+                        <label>Şu Anki Resim:</label><br />
+                        <img src="@Model.Image" width="100" style="border:1px solid #ccc;" />
+                    </div>
+                }
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="CategoryId" class="form-label">Kategori</label>
+                <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryId">
+                    <option value="">-- Kategori Seçiniz --</option>
+                </select>
+            </div>
+
+            <div class="form-group mt-4 d-flex">
+                <button type="submit" class="btn btn-success me-2">
+                    <i class="fas fa-save"></i> Güncelle
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Vazgeç
+                </a>
+            </div>
+
         </form>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Listeye Geri Dön</a>
-</div>
-
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            $("#btnDeleteProduct").on("click", function () {
+                var productId = $(this).data("id");
+                if (confirm("Bu ürünü tamamen silmek istediğinizden emin misiniz?")) {
+                    $.ajax({
+                        url: "/Admin/Product/Delete/" + productId,
+                        method: "POST",
+                        success: function (response) {
+                            if (response.success) {
+                                window.location.href = "/Admin/Product/Index";
+                            } else {
+                                alert(response.message);
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 }

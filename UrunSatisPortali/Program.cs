@@ -15,6 +15,13 @@ builder.Services.AddAuthentication("MyCookieAuth").AddCookie("MyCookieAuth", opt
     options.Cookie.Name = "MyCookieAuth";
     options.LoginPath = "/Account/Login"; // Kullanýcý giriþ yapmamýþsa yönlendirilecek sayfa
 });
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supportedCultures = new[] { "tr-TR" };
+    options.SetDefaultCulture(supportedCultures[0])
+        .AddSupportedCultures(supportedCultures)
+        .AddSupportedUICultures(supportedCultures);
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -31,6 +38,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication(); 
 app.UseAuthorization();
+app.UseRequestLocalization();
 
 app.MapControllerRoute(
   name: "areas",

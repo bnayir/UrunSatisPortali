@@ -53,6 +53,7 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
+                category.UpdatedDate = DateTime.Now;
                 _categoryRepo.Update(category);
                 return RedirectToAction(nameof(Index));
             }
