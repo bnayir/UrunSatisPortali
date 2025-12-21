@@ -50,8 +50,26 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
                 .OrderByDescending(p => p.CreatedDate)
                 .Take(5)
                 .ToList();
+            // ANALİZ: En çok yorum alan (en popüler) 5 ürün
+            var topProducts = _productRepo.GetAll("Comments")
+                .OrderByDescending(p => p.Comments.Count())
+                .Take(5)
+                .Select(p => new {
+                    Name = p.Name,
+                    TotalSales = p.Comments.Count() + 5, // Satış tablon olmadığı için yorum + sabit sayı ile simüle ediyoruz
+                    Stock = p.Stock,
+                    Price = p.Price
+                }).ToList();
 
-            return View(lastProducts); // Modeli View'a gönderiyoruz
+            ViewBag.TopProducts = topProducts;
+
+            // Kategori bazlı satış simülasyonu
+            ViewBag.CategorySalesLabels = _categoryRepo.GetAll().Select(x => x.Name).ToArray();
+            ViewBag.CategorySalesCounts = _categoryRepo.GetAll().Select(x => new Random().Next(10, 50)).ToArray();
+
+            return View(_productRepo.GetAll("Category").OrderByDescending(p => p.CreatedDate).Take(5).ToList());
         }
+
+        
     }
 }

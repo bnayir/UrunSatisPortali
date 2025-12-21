@@ -1,0 +1,67 @@
+﻿@model IEnumerable<UrunSatisPortali.Models.Comment>
+
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-light text-center rounded p-4 shadow-sm">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h6 class="mb-0 text-primary fw-bold"><i class="fas fa-comments me-2"></i>Tüm Yorumlar</h6>
+        </div>
+        <div class="table-responsive">
+            <table class="table text-start align-middle table-bordered table-hover mb-0">
+                <thead>
+                    <tr class="text-dark">
+                        <th>Kullanıcı</th>
+                        <th>Ürün</th>
+                        <th>Yorum</th>
+                        <th>Tarih</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr id="row-@item.Id">
+                            <td>@item.User?.UserName</td>
+                            <td><span class="badge bg-info text-dark">@item.Product?.Name</span></td>
+                            <td>@item.Content</td>
+                            <td>@item.CreatedDate.ToShortDateString()</td>
+                            <td>
+                                <button onclick="deleteComment(@item.Id)" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i> Sil
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function deleteComment(id) {
+        Swal.fire({
+            title: 'Emin misiniz?',
+            text: "Bu yorum kalıcı olarak silinecektir!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Evet, sil!',
+            cancelButtonText: 'İptal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '/Admin/Comment/Delete/' + id,
+                    type: 'POST',
+                    success: function (data) {
+                        if (data.success) {
+                            $("#row-" + id).fadeOut();
+                            Swal.fire('Silindi!', 'Yorum başarıyla silindi.', 'success');
+                        }
+                    }
+                });
+            }
+        })
+    }
+</script>

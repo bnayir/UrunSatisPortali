@@ -1,9 +1,9 @@
 ﻿@model IEnumerable<UrunSatisPortali.Models.Product>
 
 <div class="container-fluid pt-4 px-4">
-    <div class="row g-4">
+    <div class="row g-4 mb-4">
         <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-4 bg-primary text-white">
+            <div class="card border-0 shadow-sm rounded-4 bg-primary text-white h-100">
                 <div class="card-body d-flex align-items-center justify-content-between p-4">
                     <i class="fas fa-shopping-cart fa-3x opacity-50"></i>
                     <div class="text-end">
@@ -14,7 +14,7 @@
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-4 bg-success text-white">
+            <div class="card border-0 shadow-sm rounded-4 bg-success text-white h-100">
                 <div class="card-body d-flex align-items-center justify-content-between p-4">
                     <i class="fas fa-th-list fa-3x opacity-50"></i>
                     <div class="text-end">
@@ -25,7 +25,7 @@
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-4 bg-info text-white">
+            <div class="card border-0 shadow-sm rounded-4 bg-info text-white h-100">
                 <div class="card-body d-flex align-items-center justify-content-between p-4">
                     <i class="fas fa-award fa-3x opacity-50"></i>
                     <div class="text-end">
@@ -36,7 +36,7 @@
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-4 bg-danger text-white">
+            <div class="card border-0 shadow-sm rounded-4 bg-danger text-white h-100">
                 <div class="card-body d-flex align-items-center justify-content-between p-4">
                     <i class="fas fa-comments fa-3x opacity-50"></i>
                     <div class="text-end">
@@ -48,68 +48,82 @@
         </div>
     </div>
 
-    <div class="row g-4 mt-2">
+    <div class="row g-4 mb-4">
         <div class="col-sm-12 col-xl-8">
-            <div class="bg-white rounded-4 p-4 shadow-sm border-0">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-chart-pie me-2 text-primary"></i>Kategori Dağılım Analizi</h6>
-                </div>
-                <canvas id="categoryChart" style="max-height: 320px;"></canvas>
-
+            <div class="bg-white rounded-4 p-4 shadow-sm border-0 dashboard-main-card">
+                <h6 class="mb-4 fw-bold text-dark"><i class="fas fa-chart-pie me-2 text-primary"></i>Kategori Dağılım Analizi</h6>
+                <canvas id="categoryChart" style="max-height: 250px;"></canvas>
                 <div class="d-flex justify-content-center mt-4 gap-2">
-                    <a asp-controller="Product" asp-action="Create" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                        <i class="fas fa-plus me-1"></i> Ürün Ekle
-                    </a>
-                    <a asp-controller="Category" asp-action="Create" class="btn btn-outline-success btn-sm rounded-pill px-3">
-                        <i class="fas fa-folder-plus me-1"></i> Kategori Ekle
-                    </a>
-                    <a asp-controller="Brand" asp-action="Create" class="btn btn-outline-info btn-sm rounded-pill px-3">
-                        <i class="fas fa-tag me-1"></i> Marka Ekle
-                    </a>
+                    <a asp-controller="Product" asp-action="Create" class="btn btn-outline-primary btn-sm rounded-pill px-3">Ürün Ekle</a>
+                    <a asp-controller="Category" asp-action="Create" class="btn btn-outline-success btn-sm rounded-pill px-3">Kategori Ekle</a>
                 </div>
             </div>
         </div>
-
         <div class="col-sm-12 col-xl-4">
-            <div class="bg-white rounded-4 p-4 shadow-sm border-0">
+            <div class="bg-white rounded-4 p-4 shadow-sm border-0 dashboard-main-card overflow-auto">
                 <h6 class="mb-4 fw-bold text-dark"><i class="fas fa-history me-2 text-primary"></i>Son Eklenen Ürünler</h6>
-                <div class="table-responsive">
-                    <table class="table table-borderless table-hover align-middle">
-                        <thead class="text-muted small">
+                <table class="table table-borderless table-hover align-middle">
+                    <tbody class="small">
+                        @foreach (var item in Model)
+                        {
                             <tr>
-                                <th>Ürün Adı</th>
-                                <th class="text-end">Fiyat</th>
+                                <td class="fw-bold text-dark">@item.Name</td>
+                                <td class="text-end text-primary fw-bold">@item.Price.ToString("N2") ₺</td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in Model)
-                            {
-                                <tr>
-                                    <td class="fw-bold text-dark">@item.Name</td>
-                                    <td class="text-end">
-                                        <span class="badge bg-soft-primary text-primary fw-bold p-2">
-                                            @item.Price.ToString("N2") ₺
-                                        </span>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-                <div class="text-center mt-3">
-                    <a asp-controller="Product" asp-action="Index" class="small text-decoration-none fw-bold">Tümünü Gör <i class="fas fa-arrow-right ms-1"></i></a>
-                </div>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-sm-12 col-xl-7">
+            <div class="bg-white rounded-4 p-4 shadow-sm border-0 dashboard-main-card overflow-auto">
+                <h6 class="mb-4 fw-bold text-dark"><i class="fas fa-trophy me-2 text-warning"></i>En Çok Satan Ürünler</h6>
+                <table class="table align-middle table-hover small">
+                    <thead class="bg-light sticky-top">
+                        <tr class="text-muted">
+                            <th>ÜRÜN</th>
+                            <th>SATIŞ</th>
+                            <th>STOK</th>
+                            <th>DURUM</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in ViewBag.TopProducts)
+                        {
+                            <tr>
+                                <td class="fw-bold">@item.Name</td>
+                                <td><span class="badge bg-soft-success text-success p-2">@item.TotalSales Adet</span></td>
+                                <td>@item.Stock</td>
+                                <td>
+                                    @if (item.Stock < 10)
+                                    {
+                                        <span class="badge bg-danger">Kritik</span>
+                                    }
+                                    else
+                                    {
+
+                                        <span class="badge bg-success">Yeterli</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="col-sm-12 col-xl-5">
+            <div class="bg-white rounded-4 p-4 shadow-sm border-0 dashboard-main-card">
+                <h6 class="mb-4 fw-bold text-dark"><i class="fas fa-chart-bar me-2 text-info"></i>Kategori Bazlı Satış</h6>
+                <canvas id="salesChart"></canvas>
             </div>
         </div>
     </div>
 </div>
 
 <style>
-    /* Ekstra Canlılık İçin Küçük CSS Dokunuşları */
-    .bg-soft-primary {
-        background-color: #e7f0ff;
-    }
-
     .fw-extra-bold {
         font-weight: 800;
     }
@@ -118,38 +132,75 @@
         border-radius: 1rem !important;
     }
 
-    .card {
-        transition: transform 0.3s ease;
+    .bg-soft-primary {
+        background-color: #e7f0ff;
     }
 
-        .card:hover {
-            transform: translateY(-5px);
-        }
+    .bg-soft-success {
+        background-color: #d1e7dd;
+    }
+
+    /* TÜM ANA KARTLARIN YÜKSEKLİĞİNİ EŞİTLER */
+    .dashboard-main-card {
+        height: 400px;
+        position: relative;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        transition: 0.3s;
+    }
 </style>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        var ctx = document.getElementById('categoryChart').getContext('2d');
-        new Chart(ctx, {
+        // Kategori Doughnut Chart
+        new Chart(document.getElementById('categoryChart'), {
             type: 'doughnut',
             data: {
                 labels: @Html.Raw(Json.Serialize(ViewBag.CategoryLabels)),
                 datasets: [{
                     data: @Html.Raw(Json.Serialize(ViewBag.CategoryCounts)),
-                    // DAHA CANLI RENK PALETİ
-                    backgroundColor: [
-                        '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#6610f2'
-                    ],
-                    hoverOffset: 20,
+                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#6610f2'],
+                    hoverOffset: 15,
                     borderWidth: 0
                 }]
             },
-            options: {
-                cutout: '70%',
-                plugins: {
-                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
-                }
+            options: { cutout: '75%', plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // Satış Bar Chart
+        new Chart(document.getElementById('salesChart'), {
+            type: 'bar',
+            data: {
+                labels: @Html.Raw(Json.Serialize(ViewBag.CategorySalesLabels)),
+                datasets: [{
+                    label: 'Satış',
+                    data: @Html.Raw(Json.Serialize(ViewBag.CategorySalesCounts)),
+                    backgroundColor: '#4e73df',
+                    borderRadius: 5
+                }]
+            },
+            options: { plugins: { legend: { display: false } } }
+        });
+                // Sayfa açıldığında stok kontrolü yapan fonksiyon
+        document.addEventListener("DOMContentLoaded", function() {
+            @foreach (var item in ViewBag.TopProducts)
+            {
+                    if (item.Stock < 5)
+                    {
+                            <text>
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'warning',
+                                title: '@item.Name stoğu kritik seviyede! (@item.Stock adet)',
+                                showConfirmButton: false,
+                                timer: 4000
+                            });
+                            </text>
+                    }
             }
         });
     </script>
