@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UrunSatisPortali.Models
 {
@@ -21,5 +22,10 @@ namespace UrunSatisPortali.Models
         // Foreign Key ve Navigation Property
         public int CategoryId { get; set; }
         public Category Category { get; set; }
+        // Product.cs içine eklenecekler:
+        public int? BrandId { get; set; } // Foreign Key
+        [ForeignKey("BrandId")]
+        public Brand Brand { get; set; } // Navigation Property
+        public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
     }
 }

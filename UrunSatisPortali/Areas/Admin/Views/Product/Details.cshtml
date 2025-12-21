@@ -1,0 +1,68 @@
+﻿@model UrunSatisPortali.Models.Product
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <img src="@Model.Image" class="img-fluid rounded shadow" alt="@Model.Name">
+        </div>
+        <div class="col-md-6">
+            <span class="badge bg-info text-dark">@Model.Brand?.Name</span>
+            <h1 class="display-5">@Model.Name</h1>
+            <p class="lead">@Model.Category?.Name</p>
+            <h3 class="text-primary mb-4">@Model.Price.ToString("C2")</h3>
+            <p>@Model.Description</p>
+            <hr />
+            <p><strong>Stok Durumu:</strong> @Model.Stock adet</p>
+        </div>
+    </div>
+
+    <hr class="my-5" />
+
+    <div class="row">
+        <div class="col-md-8">
+            <h4>Yorumlar (@Model.Comments?.Count() ?? 0)</h4>
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div class="card my-4 shadow-sm">
+                    <div class="card-body">
+                        <h6>Yorum Bırak:</h6>
+                        <form asp-controller="Comment" asp-action="AddComment" method="post">
+                            <input type="hidden" name="productId" value="@Model.Id" />
+                            <div class="form-group mb-2">
+                                <textarea name="content" class="form-control" rows="3" required placeholder="Düşüncelerinizi paylaşın..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Gönder</button>
+                        </form>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning">Yorum yapabilmek için lütfen giriş yapın.</div>
+            }
+
+            <div class="comment-list mt-4">
+                @if (Model.Comments != null && Model.Comments.Any())
+                {
+                    @foreach (var comment in Model.Comments.OrderByDescending(c => c.CreatedDate))
+                    {
+                        <div class="d-flex mb-4 p-3 bg-light rounded shadow-sm">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-person-circle h2 text-secondary"></i>
+                            </div>
+                            <div class="ms-3">
+                                <div class="fw-bold">@comment.User?.UserName <small class="text-muted fw-normal"> - @comment.CreatedDate.ToShortDateString()</small></div>
+                                @comment.Content
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted">Henüz yorum yapılmamış. İlk yorumu sen yap!</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

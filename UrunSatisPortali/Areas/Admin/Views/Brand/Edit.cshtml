@@ -1,0 +1,23 @@
+﻿@model UrunSatisPortali.Models.Brand
+
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-sm-12 col-xl-6">
+            <div class="bg-light rounded h-100 p-4 shadow-sm">
+                <h6 class="mb-4">Markayı Düzenle</h6>
+                <form asp-action="Edit" method="post">
+                    <input type="hidden" asp-for="Id" />
+                    <div class="mb-3">
+                        <label asp-for="Name" class="form-label">Marka Adı</label>
+                        <input asp-for="Name" class="form-control">
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-edit me-2"></i>Güncelle
+                    </button>
+                    <a asp-action="Index" class="btn btn-secondary ms-2">İptal</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

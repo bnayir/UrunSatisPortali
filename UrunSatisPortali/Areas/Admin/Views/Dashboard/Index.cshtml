@@ -1,60 +1,89 @@
-﻿@{
-    ViewData["Title"] = "Admin Paneli Anasayfa";
+﻿@model IEnumerable<UrunSatisPortali.Models.Product>
+
+<div class="container-fluid pt-4 px-4">
+    <div class="row g-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4 shadow-sm border-start border-primary border-4">
+                <i class="bg-primary text-white h1 mb-0"></i>
+                <div class="ms-3 text-end">
+                    <p class="mb-2 text-muted">Toplam Ürün</p>
+                    <h6 class="mb-0 h4">@ViewBag.ProductCount</h6>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4 shadow-sm border-start border-success border-4">
+                <i class="bg-success text-white h1 mb-0"></i>
+                <div class="ms-3 text-end">
+                    <p class="mb-2 text-muted">Kategoriler</p>
+                    <h6 class="mb-0 h4">@ViewBag.CategoryCount</h6>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4 shadow-sm border-start border-info border-4">
+                <i class="bg-info text-white h1 mb-0"></i>
+                <div class="ms-3 text-end">
+                    <p class="mb-2 text-muted">Markalar</p>
+                    <h6 class="mb-0 h4">@ViewBag.BrandCount</h6>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4 shadow-sm border-start border-warning border-4">
+                <i class="bg-warning text-dark h1 mb-0"></i>
+                <div class="ms-3 text-end">
+                    <p class="mb-2 text-muted">Yorumlar</p>
+                    <h6 class="mb-0 h4">@ViewBag.CommentCount</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-2">
+        <div class="col-sm-12 col-xl-8">
+            <div class="bg-light text-center rounded p-4 shadow-sm">
+                <h6 class="mb-4 text-start">Kategori Dağılımı</h6>
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+        <div class="col-sm-12 col-xl-4">
+            <div class="bg-light rounded p-4 shadow-sm">
+                <h6 class="mb-4">Son Eklenen 5 Ürün</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.Name</td>
+                                    <td class="text-end text-primary fw-bold">@item.Price.ToString("C2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var ctx = document.getElementById('categoryChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: @Html.Raw(Json.Serialize(ViewBag.CategoryLabels)),
+                datasets: [{
+                    label: 'Ürün Sayısı',
+                    data: @Html.Raw(Json.Serialize(ViewBag.CategoryCounts)),
+                    backgroundColor: 'rgba(13, 110, 253, 0.6)',
+                    borderColor: '#0d6efd',
+                    borderWidth: 1
+                }]
+            }
+        });
+    </script>
 }
-
-<div class="d-sm-flex align-items-center justify-content-between mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Panel Özeti</h1>
-</div>
-
-<div class="row">
-
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Toplam Ürün
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.ProductCount</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-box fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-success shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                            Toplam Kategori
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.CategoryCount</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-list fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<div class="row">
-    <div class="col-lg-12">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Hoşgeldiniz</h6>
-            </div>
-            <div class="card-body">
-                <p>Admin paneline hoşgeldiniz. Sol taraftaki menüyü kullanarak Kategori ve Ürün işlemlerinizi gerçekleştirebilirsiniz.</p>
-            </div>
-        </div>
-    </div>
-</div>

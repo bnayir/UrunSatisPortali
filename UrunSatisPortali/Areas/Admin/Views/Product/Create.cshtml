@@ -50,6 +50,12 @@
                     </select>
                     <span asp-validation-for="CategoryId" class="text-danger"></span>
                 </div>
+                <div class="mb-3">
+                    <label>Marka</label>
+                    <select asp-for="BrandId" asp-items="ViewBag.BrandId" class="form-control">
+                        <option disabled selected>--Marka Seçin--</option>
+                    </select>
+                </div>
 
                 <div class="form-check mb-3">
                     <input class="form-check-input" type="checkbox" asp-for="IsActive" checked id="chkActive">
