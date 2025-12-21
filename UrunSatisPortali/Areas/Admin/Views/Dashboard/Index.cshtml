@@ -3,38 +3,46 @@
 <div class="container-fluid pt-4 px-4">
     <div class="row g-4">
         <div class="col-sm-6 col-xl-3">
-            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4 shadow-sm border-start border-primary border-4">
-                <i class="bg-primary text-white h1 mb-0"></i>
-                <div class="ms-3 text-end">
-                    <p class="mb-2 text-muted">Toplam Ürün</p>
-                    <h6 class="mb-0 h4">@ViewBag.ProductCount</h6>
+            <div class="card border-0 shadow-sm rounded-4 bg-primary text-white">
+                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                    <i class="fas fa-shopping-cart fa-3x opacity-50"></i>
+                    <div class="text-end">
+                        <p class="mb-1 fw-bold">Toplam Ürün</p>
+                        <h2 class="mb-0 fw-extra-bold">@ViewBag.ProductCount</h2>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4 shadow-sm border-start border-success border-4">
-                <i class="bg-success text-white h1 mb-0"></i>
-                <div class="ms-3 text-end">
-                    <p class="mb-2 text-muted">Kategoriler</p>
-                    <h6 class="mb-0 h4">@ViewBag.CategoryCount</h6>
+            <div class="card border-0 shadow-sm rounded-4 bg-success text-white">
+                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                    <i class="fas fa-th-list fa-3x opacity-50"></i>
+                    <div class="text-end">
+                        <p class="mb-1 fw-bold">Kategoriler</p>
+                        <h2 class="mb-0 fw-extra-bold">@ViewBag.CategoryCount</h2>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4 shadow-sm border-start border-info border-4">
-                <i class="bg-info text-white h1 mb-0"></i>
-                <div class="ms-3 text-end">
-                    <p class="mb-2 text-muted">Markalar</p>
-                    <h6 class="mb-0 h4">@ViewBag.BrandCount</h6>
+            <div class="card border-0 shadow-sm rounded-4 bg-info text-white">
+                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                    <i class="fas fa-award fa-3x opacity-50"></i>
+                    <div class="text-end">
+                        <p class="mb-1 fw-bold">Markalar</p>
+                        <h2 class="mb-0 fw-extra-bold">@ViewBag.BrandCount</h2>
+                    </div>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="bg-light rounded d-flex align-items-center justify-content-between p-4 shadow-sm border-start border-warning border-4">
-                <i class="bg-warning text-dark h1 mb-0"></i>
-                <div class="ms-3 text-end">
-                    <p class="mb-2 text-muted">Yorumlar</p>
-                    <h6 class="mb-0 h4">@ViewBag.CommentCount</h6>
+            <div class="card border-0 shadow-sm rounded-4 bg-danger text-white">
+                <div class="card-body d-flex align-items-center justify-content-between p-4">
+                    <i class="fas fa-comments fa-3x opacity-50"></i>
+                    <div class="text-end">
+                        <p class="mb-1 fw-bold">Yorumlar</p>
+                        <h2 class="mb-0 fw-extra-bold">@ViewBag.CommentCount</h2>
+                    </div>
                 </div>
             </div>
         </div>
@@ -42,31 +50,82 @@
 
     <div class="row g-4 mt-2">
         <div class="col-sm-12 col-xl-8">
-            <div class="bg-light text-center rounded p-4 shadow-sm">
-                <h6 class="mb-4 text-start">Kategori Dağılımı</h6>
-                <canvas id="categoryChart"></canvas>
+            <div class="bg-white rounded-4 p-4 shadow-sm border-0">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-chart-pie me-2 text-primary"></i>Kategori Dağılım Analizi</h6>
+                </div>
+                <canvas id="categoryChart" style="max-height: 320px;"></canvas>
+
+                <div class="d-flex justify-content-center mt-4 gap-2">
+                    <a asp-controller="Product" asp-action="Create" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                        <i class="fas fa-plus me-1"></i> Ürün Ekle
+                    </a>
+                    <a asp-controller="Category" asp-action="Create" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                        <i class="fas fa-folder-plus me-1"></i> Kategori Ekle
+                    </a>
+                    <a asp-controller="Brand" asp-action="Create" class="btn btn-outline-info btn-sm rounded-pill px-3">
+                        <i class="fas fa-tag me-1"></i> Marka Ekle
+                    </a>
+                </div>
             </div>
         </div>
+
         <div class="col-sm-12 col-xl-4">
-            <div class="bg-light rounded p-4 shadow-sm">
-                <h6 class="mb-4">Son Eklenen 5 Ürün</h6>
+            <div class="bg-white rounded-4 p-4 shadow-sm border-0">
+                <h6 class="mb-4 fw-bold text-dark"><i class="fas fa-history me-2 text-primary"></i>Son Eklenen Ürünler</h6>
                 <div class="table-responsive">
-                    <table class="table table-sm">
+                    <table class="table table-borderless table-hover align-middle">
+                        <thead class="text-muted small">
+                            <tr>
+                                <th>Ürün Adı</th>
+                                <th class="text-end">Fiyat</th>
+                            </tr>
+                        </thead>
                         <tbody>
                             @foreach (var item in Model)
                             {
                                 <tr>
-                                    <td>@item.Name</td>
-                                    <td class="text-end text-primary fw-bold">@item.Price.ToString("C2")</td>
+                                    <td class="fw-bold text-dark">@item.Name</td>
+                                    <td class="text-end">
+                                        <span class="badge bg-soft-primary text-primary fw-bold p-2">
+                                            @item.Price.ToString("N2") ₺
+                                        </span>
+                                    </td>
                                 </tr>
                             }
                         </tbody>
                     </table>
                 </div>
+                <div class="text-center mt-3">
+                    <a asp-controller="Product" asp-action="Index" class="small text-decoration-none fw-bold">Tümünü Gör <i class="fas fa-arrow-right ms-1"></i></a>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    /* Ekstra Canlılık İçin Küçük CSS Dokunuşları */
+    .bg-soft-primary {
+        background-color: #e7f0ff;
+    }
+
+    .fw-extra-bold {
+        font-weight: 800;
+    }
+
+    .rounded-4 {
+        border-radius: 1rem !important;
+    }
+
+    .card {
+        transition: transform 0.3s ease;
+    }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+</style>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -77,12 +136,20 @@
             data: {
                 labels: @Html.Raw(Json.Serialize(ViewBag.CategoryLabels)),
                 datasets: [{
-                    label: 'Ürün Sayısı',
                     data: @Html.Raw(Json.Serialize(ViewBag.CategoryCounts)),
-                    backgroundColor: 'rgba(13, 110, 253, 0.6)',
-                    borderColor: '#0d6efd',
-                    borderWidth: 1
+                    // DAHA CANLI RENK PALETİ
+                    backgroundColor: [
+                        '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#6610f2'
+                    ],
+                    hoverOffset: 20,
+                    borderWidth: 0
                 }]
+            },
+            options: {
+                cutout: '70%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+                }
             }
         });
     </script>

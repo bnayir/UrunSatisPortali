@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation; // GEREKLİ: ValidateNever için
 using UrunSatisPortali.Data;
 using UrunSatisPortali.Models;
 
@@ -12,9 +13,8 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
     {
         private readonly IRepository<Product> _productRepo;
         private readonly IRepository<Category> _categoryRepo;
-        private readonly IRepository<Brand> _brandRepo; // EKLENDİ
+        private readonly IRepository<Brand> _brandRepo;
 
-        // Constructor'a _brandRepo eklendi
         public ProductController(IRepository<Product> productRepo, IRepository<Category> categoryRepo, IRepository<Brand> brandRepo)
         {
             _productRepo = productRepo;
@@ -24,20 +24,14 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
 
         public IActionResult Index()
         {
-            // Hem Kategori hem Marka bilgilerini beraber çekiyoruz
             var products = _productRepo.GetAll("Category,Brand");
             return View(products);
         }
 
         public IActionResult Create()
         {
-            // Kategorileri çek ve ViewBag'e koy
             ViewBag.CategoryId = new SelectList(_categoryRepo.GetAll(), "Id", "Name");
-
-            // MARKALARI ÇEK VE ViewBag'e KOY (Burası eksik olabilir)
-            var brands = _brandRepo.GetAll();
-            ViewBag.BrandId = new SelectList(brands, "Id", "Name");
-
+            ViewBag.BrandId = new SelectList(_brandRepo.GetAll(), "Id", "Name");
             return View();
         }
 
@@ -45,6 +39,11 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(Product product)
         {
+            // İPUCU: Eğer buton hala çalışmıyorsa, ModelState içindeki 
+            // 'Category' ve 'Brand' nesne hatalarını manuel siliyoruz.
+            ModelState.Remove("Category");
+            ModelState.Remove("Brand");
+
             if (ModelState.IsValid)
             {
                 product.CreatedDate = DateTime.Now;
@@ -52,8 +51,9 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            // Hata varsa sayfaya geri dön ve listeleri tekrar yükle
             ViewBag.CategoryId = new SelectList(_categoryRepo.GetAll(), "Id", "Name", product.CategoryId);
-            ViewBag.BrandId = new SelectList(_brandRepo.GetAll(), "Id", "Name", product.BrandId); // Hata durumunda tekrar doldur
+            ViewBag.BrandId = new SelectList(_brandRepo.GetAll(), "Id", "Name", product.BrandId);
             return View(product);
         }
 
@@ -63,7 +63,7 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
             if (product == null) return NotFound();
 
             ViewBag.CategoryId = new SelectList(_categoryRepo.GetAll(), "Id", "Name", product.CategoryId);
-            ViewBag.BrandId = new SelectList(_brandRepo.GetAll(), "Id", "Name", product.BrandId); // Markayı gönder
+            ViewBag.BrandId = new SelectList(_brandRepo.GetAll(), "Id", "Name", product.BrandId);
             return View(product);
         }
 
@@ -71,21 +71,31 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(Product product)
         {
-            var dbProduct = _productRepo.GetById(product.Id);
-            if (dbProduct == null) return NotFound();
+            ModelState.Remove("Category");
+            ModelState.Remove("Brand");
 
-            dbProduct.Name = product.Name;
-            dbProduct.Description = product.Description;
-            dbProduct.Price = product.Price;
-            dbProduct.Stock = product.Stock;
-            dbProduct.IsActive = product.IsActive;
-            dbProduct.CategoryId = product.CategoryId;
-            dbProduct.BrandId = product.BrandId; // Markayı güncelle
-            dbProduct.Image = product.Image;
-            dbProduct.UpdatedDate = DateTime.Now;
+            if (ModelState.IsValid)
+            {
+                var dbProduct = _productRepo.GetById(product.Id);
+                if (dbProduct == null) return NotFound();
 
-            _productRepo.Update(dbProduct);
-            return RedirectToAction(nameof(Index));
+                dbProduct.Name = product.Name;
+                dbProduct.Description = product.Description;
+                dbProduct.Price = product.Price;
+                dbProduct.Stock = product.Stock;
+                dbProduct.IsActive = product.IsActive;
+                dbProduct.CategoryId = product.CategoryId;
+                dbProduct.BrandId = product.BrandId;
+                dbProduct.Image = product.Image;
+                dbProduct.UpdatedDate = DateTime.Now;
+
+                _productRepo.Update(dbProduct);
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewBag.CategoryId = new SelectList(_categoryRepo.GetAll(), "Id", "Name", product.CategoryId);
+            ViewBag.BrandId = new SelectList(_brandRepo.GetAll(), "Id", "Name", product.BrandId);
+            return View(product);
         }
 
         [HttpPost]
@@ -96,16 +106,6 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
 
             _productRepo.Delete(product);
             return Json(new { success = true });
-        }
-        // Ana projedeki ProductController içine:
-        public IActionResult Details(int id)
-        {
-            // Ürünü, Kategorisini, Markasını ve Yorumlarını (Kullanıcılarıyla birlikte) çekiyoruz
-            var product = _productRepo.GetAll("Category,Brand,Comments.User").FirstOrDefault(x => x.Id == id);
-
-            if (product == null) return NotFound();
-
-            return View(product);
         }
     }
 }

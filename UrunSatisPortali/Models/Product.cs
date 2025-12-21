@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace UrunSatisPortali.Models
@@ -21,10 +22,12 @@ namespace UrunSatisPortali.Models
         public DateTime? UpdatedDate { get; set; }
         // Foreign Key ve Navigation Property
         public int CategoryId { get; set; }
+        [ValidateNever]
         public Category Category { get; set; }
         // Product.cs içine eklenecekler:
         public int? BrandId { get; set; } // Foreign Key
         [ForeignKey("BrandId")]
+        [ValidateNever]
         public Brand Brand { get; set; } // Navigation Property
         public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
     }
