@@ -77,7 +77,7 @@
                         <i class="fas fa-edit"></i> Düzenle
                     </a>
 
-                    <button class="btn btn-danger btn-sm js-delete" data-id="@item.Id" data-name="@item.Name">
+                    <button class="btn btn-danger btn-sm js-delete" data-id="@item.Id">
                         <i class="fas fa-trash"></i> Sil
                     </button>
                 </td>
@@ -108,63 +108,30 @@
             $("#imageModal").modal("show");
         }
 
-        // 2. AJAX Silme Logiği (SweetAlert ile)
+        // 2. Silme İşlemi (Standart ve Güvenli)
         $(document).ready(function () {
-
             $(".js-delete").on("click", function () {
                 var btn = $(this);
                 var id = btn.data("id");
-                var name = btn.data("name"); // Ürün adını alalım
 
-                // SweetAlert ile emin misin diye sor
-                Swal.fire({
-                    title: 'Emin misiniz?',
-                    text: "'" + name + "' ürününü silmek üzeresiniz. Bu işlem geri alınamaz!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Evet, Sil!',
-                    cancelButtonText: 'İptal'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Kullanıcı onayladıysa AJAX çağrısı yap
-                        $.ajax({
-                            url: "/Admin/Product/Delete/" + id,
-                            method: "POST",
-                            success: function (response) {
-                                if (response.success) {
-                                    // 1. Satırı animasyonla sil
-                                    btn.closest("tr").fadeOut(500, function() {
-                                        $(this).remove();
-                                    });
-
-                                    // 2. SweetAlert ile BAŞARI mesajı çıkar
-                                    Swal.fire(
-                                        'Silindi!',
-                                        response.message,
-                                        'success'
-                                    )
-                                } else {
-                                    // Hata varsa
-                                    Swal.fire(
-                                        'Hata!',
-                                        response.message,
-                                        'error'
-                                    )
-                                }
-                            },
-                            error: function () {
-                                Swal.fire(
-                                    'Hata!',
-                                    'Sunucuya ulaşırken bir hata oluştu.',
-                                    'error'
-                                )
+                // SweetAlert yerine Klasik ve Güvenli Onay Kutusu
+                if (confirm("Bu ürünü silmek istediğinize emin misiniz?")) {
+                    $.ajax({
+                        url: "/Admin/Product/Delete/" + id,
+                        method: "POST",
+                        success: function (response) {
+                            if (response.success) {
+                                btn.closest("tr").fadeOut();
+                            } else {
+                                alert("Silinemedi: " + response.message);
                             }
-                        });
-                    }
-                }) // SweetAlert.then bitişi
-            }); // js-delete click bitişi
-        }); // document.ready bitişi
+                        },
+                        error: function () {
+                            alert("Bir hata oluştu.");
+                        }
+                    });
+                }
+            });
+        });
     </script>
 }
