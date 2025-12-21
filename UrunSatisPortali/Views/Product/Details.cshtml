@@ -1,0 +1,86 @@
+﻿@model UrunSatisPortali.Models.Product
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-5">
+            <img src="@Model.Image" class="img-fluid rounded shadow" alt="@Model.Name" style="min-height:300px;">
+        </div>
+        <div class="col-md-7">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/">Ana Sayfa</a></li>
+                    <li class="breadcrumb-item active">@Model.Category?.Name</li>
+                </ol>
+            </nav>
+            <h1 class="display-5 fw-bold">@Model.Name</h1>
+            <p class="badge bg-secondary">@Model.Brand?.Name</p>
+            <h3 class="text-primary my-4">@Model.Price.ToString("C2")</h3>
+            <p class="lead">@Model.Description</p>
+
+            <div class="d-grid gap-2 d-md-block mt-4">
+                <button class="btn btn-success btn-lg shadow" type="button">
+                    <i class="bi bi-cart-plus"></i> Sepete Ekle
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-5" />
+
+    <div class="row">
+        <div class="col-md-8">
+            <h4 class="mb-4">Kullanıcı Yorumları (@(Model.Comments?.Count() ?? 0))</h4>
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div class="card mb-4 border-0 shadow-sm bg-light">
+                    <div class="card-body">
+                        <h6 class="fw-bold">Yorum Yaz</h6>
+                        <form asp-area="" asp-controller="Comment" asp-action="AddComment" method="post">
+                            <input type="hidden" name="productId" value="@Model.Id" />
+                            <div class="mb-3">
+                                <textarea name="content" class="form-control" rows="3" placeholder="Bu ürün hakkında ne düşünüyorsunuz?" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Gönder</button>
+                        </form>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    Yorum yapabilmek için lütfen <a asp-area="Identity" asp-page="/Account/Login">giriş yapın</a>.
+                </div>
+            }
+
+            <div class="mt-4">
+                @if (Model.Comments != null && Model.Comments.Any())
+                {
+                    @foreach (var comment in Model.Comments.OrderByDescending(c => c.CreatedDate))
+                    {
+                        <div class="d-flex mb-3 p-3 border-bottom">
+                            <div class="flex-shrink-0">
+                                <i class="bi bi-person-circle fs-2 text-muted"></i>
+                            </div>
+                            <div class="ms-3 w-100">
+                                <div class="d-flex justify-content-between">
+                                    <h6 class="fw-bold mb-0">@(comment.User?.UserName ?? "Kullanıcı")</h6>
+                                    <small class="text-muted">@comment.CreatedDate.ToShortDateString()</small>
+                                </div>
+                                <p class="mb-0 mt-1">@comment.Content</p>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted">Henüz yorum yapılmamış.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

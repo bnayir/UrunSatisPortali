@@ -1,32 +1,20 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using UrunSatisPortali.Models;
+using UrunSatisPortali.Data;
 
-namespace UrunSatisPortali.Controllers
+public class HomeController : Controller
 {
-    public class HomeController : Controller
+    private readonly IRepository<Product> _productRepo;
+
+    public HomeController(IRepository<Product> productRepo)
     {
-        private readonly ILogger<HomeController> _logger;
+        _productRepo = productRepo;
+    }
 
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
-
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
+    public IActionResult Index()
+    {
+        // Veritabanýndaki tüm ürünleri alýp ana sayfaya (View) gönderiyoruz
+        var products = _productRepo.GetAll().ToList();
+        return View(products);
     }
 }

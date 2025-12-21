@@ -1,0 +1,43 @@
+﻿@model List<CartItem>
+
+<div class="container mt-5">
+    <h2 class="mb-4 fw-bold"><i class="bi bi-cart3"></i> Sepetim</h2>
+    <div class="row">
+        <div class="col-md-8">
+            <table class="table align-middle shadow-sm rounded overflow-hidden">
+                <thead class="bg-primary text-white">
+                    <tr>
+                        <th>Ürün</th>
+                        <th>Fiyat</th>
+                        <th>Adet</th>
+                        <th>Toplam</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">@item.ProductName</td>
+                            <td>@item.Price.ToString("C2")</td>
+                            <td>@item.Quantity</td>
+                            <td class="text-primary fw-bold">@((item.Price * item.Quantity).ToString("C2"))</td>
+                            <td><a asp-action="Remove" asp-route-id="@item.ProductId" class="btn btn-sm btn-outline-danger">Sil</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm bg-light p-4">
+                <h4 class="fw-bold">Sipariş Özeti</h4>
+                <hr>
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Toplam Tutar:</span>
+                    <span class="h4 text-primary">@Model.Sum(x => x.Price * x.Quantity).ToString("C2")</span>
+                </div>
+                <button class="btn btn-success btn-lg w-100 rounded-pill shadow">Siparişi Tamamla</button>
+            </div>
+        </div>
+    </div>
+</div>

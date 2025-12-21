@@ -8,7 +8,7 @@ using UrunSatisPortali.Models;
 namespace UrunSatisPortali.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class DashboardController : Controller
     {
         private readonly IRepository<Product> _productRepo;

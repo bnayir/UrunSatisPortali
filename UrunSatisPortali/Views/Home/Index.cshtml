@@ -1,8 +1,128 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
-}
+﻿@model IEnumerable<UrunSatisPortali.Models.Product>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@* Hero Section - Profesyonel Görünüm *@
+<div class="p-5 mb-5 bg-primary rounded-4 text-white shadow-lg overflow-hidden position-relative" style="background: linear-gradient(135deg, #4e73df 0%, #224abe 100%) !important;">
+    <div class="container-fluid py-5 position-relative" style="z-index: 2;">
+        <h1 class="display-4 fw-bold mb-3">Kozmetik Dünyasını Keşfedin</h1>
+        <p class="col-md-8 fs-4 text-white-50 mb-4">Lüks parfümler ve profesyonel makyaj ürünleri. Kendinizi şımartmanın en şık yolu şimdi burada.</p>
+        <a href="#urunler" class="btn btn-warning btn-lg rounded-pill px-5 fw-bold shadow">Alışverişe Başla</a>
+    </div>
+    @* Süsleme Amaçlı Arka Plan İkonu *@
+    <i class="fas fa-magic position-absolute text-white-50" style="font-size: 200px; right: -50px; bottom: -50px; opacity: 0.1; transform: rotate(-15deg);"></i>
 </div>
+
+<div class="container mb-5" id="urunler">
+    <div class="row g-4">
+        @* Sol Taraf - Filtreleme / Kategoriler *@
+        <div class="col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 sticky-top" style="top: 20px;">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-filter me-2 text-primary"></i>Kategoriler</h5>
+                </div>
+                <div class="list-group list-group-flush p-3 pt-0">
+                    <a href="/" class="list-group-item list-group-item-action border-0 rounded-3 mb-1 active shadow-sm">
+                        <i class="fas fa-th-large me-2"></i>Tümü
+                    </a>
+                    @* Burada ileride dinamik kategorileri dönebilirsin *@
+                    <a href="#" class="list-group-item list-group-item-action border-0 rounded-3 mb-1">
+                        <i class="fas fa-spray-can me-2"></i>Parfüm
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action border-0 rounded-3 mb-1">
+                        <i class="fas fa-palette me-2"></i>Makyaj
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        @* Sağ Taraf - Ürün Listesi *@
+        <div class="col-lg-9">
+            <div class="row g-4">
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        <div class="col-md-6 col-xl-4">
+                            <div class="card h-100 border-0 shadow-sm rounded-4 product-card overflow-hidden">
+                                @* Ürün Görseli *@
+                                <div class="position-relative">
+                                    <img src="@item.Image" class="card-img-top" alt="@item.Name" style="height: 250px; object-fit: cover;">
+                                    @if (item.Stock < 5 && item.Stock > 0)
+                                    {
+                                        <div class="badge bg-warning text-dark position-absolute top-0 start-0 m-3 shadow-sm py-2 px-3 rounded-pill fw-bold">Son @item.Stock Adet!</div>
+                                    }
+                                    <div class="badge bg-primary position-absolute top-0 end-0 m-3 shadow-sm py-2 px-3 rounded-pill fw-bold">Yeni</div>
+                                </div>
+
+                                <div class="card-body p-4">
+                                    <h6 class="text-primary small fw-bold text-uppercase mb-1">@item.Brand?.Name</h6>
+                                    <h5 class="card-title fw-bold text-dark mb-3 text-truncate">@item.Name</h5>
+
+                                    <div class="d-flex justify-content-between align-items-center mt-auto">
+                                        <div>
+                                            <span class="text-muted small d-block">Fiyat</span>
+                                            <span class="h4 text-dark fw-bold mb-0">@item.Price.ToString("C2")</span>
+                                        </div>
+                                        @* İncele Butonu - Details sayfasına gider *@
+                                        <a asp-area="" asp-controller="Product" asp-action="Details" asp-route-id="@item.Id"
+                                           class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold">
+                                            İncele
+                                        </a>
+                                    </div>
+                                    @* SEPETE EKLE BUTONU BURAYA GELECEK *@
+                                    <div class="btn-group">
+                                        <a asp-area="" asp-controller="Product" asp-action="Details" asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-outline-primary shadow-sm fw-bold">
+                                            İncele
+                                        </a>
+                                        <a asp-controller="Cart" asp-action="AddToCart" asp-route-id="@item.Id"
+                                           class="btn btn-sm btn-primary shadow-sm fw-bold">
+                                            <i class="bi bi-cart-plus"></i> Sepete Ekle
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-box-open fa-4x text-light mb-3"></i>
+                        <p class="text-muted fs-5">Henüz ürün eklenmemiş.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Profesyonel Kart Animasyonu */
+    .product-card {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+        .product-card:hover {
+            transform: translateY(-12px);
+            box-shadow: 0 1.5rem 3.5rem rgba(0,0,0,.1) !important;
+        }
+
+        .product-card img {
+            transition: transform 0.6s ease;
+        }
+
+        .product-card:hover img {
+            transform: scale(1.1);
+        }
+
+    /* Kategori Link Efekti */
+    .list-group-item {
+        transition: all 0.2s ease;
+    }
+
+        .list-group-item:not(.active):hover {
+            background-color: #f8f9fc;
+            padding-left: 1.5rem;
+            color: #4e73df;
+        }
+</style>

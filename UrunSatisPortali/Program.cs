@@ -1,32 +1,39 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using UrunSatisPortali.Data;
+using UrunSatisPortali.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. VERÝTABANI BAÐLANTISI
+// 1. VERÄ°TABANI BAÄžLANTISI
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// 2. KENDÝ ÖZEL GÝRÝÞ SÝSTEMÝN (Cookie Authentication)
-// Senin AccountController içindeki "MyCookieAuth" ismiyle birebir ayný olmalý
-builder.Services.AddAuthentication("MyCookieAuth")
-    .AddCookie("MyCookieAuth", options =>
-    {
-        options.LoginPath = "/Account/Login"; // Senin Controller'ýnýn yolu
-        options.AccessDeniedPath = "/Home/AccessDenied";
-    });
+// 2. IDENTITY SERVÄ°SLERÄ°
+// NOT: .AddDefaultIdentity yerine .AddIdentity kullanmak Rol yÃ¶netimi (Admin) iÃ§in bazen daha kararlÄ±dÄ±r.
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => {
+    options.Password.RequireDigit = false;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.SignIn.RequireConfirmedAccount = false;
+})
+.AddEntityFrameworkStores<ApplicationDbContext>()
+.AddDefaultTokenProviders()
+.AddDefaultUI(); // Identity ekranlarÄ±nÄ±n (Login/Register) Ã§alÄ±ÅŸmasÄ± iÃ§in ÅŸart.
 
-// 3. SERVÝS KAYITLARI
+// 3. SERVÄ°S KAYITLARI
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
+builder.Services.AddSignalR(); // SignalR servisi eklendi.
 
 var app = builder.Build();
 
-// 4. HTTP PIPELINE AYARLARI
+// 4. HTTP PIPELINE
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -38,14 +45,20 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// Önce kimlik doðrulama, sonra yetkilendirme
+// SIRALAMA: Authentication her zaman Authorization'dan Ã¶nce gelmeli!
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 5. ROTALAR
+// 5. SIGNALR HUB EÅžLEÅžTÄ°RMESÄ°
+// Buradaki "/dashboardHub" ismi JS tarafÄ±ndaki withUrl("/dashboardHub") ile aynÄ± olmalÄ±.
+app.MapHub<DashboardHub>("/dashboardHub");
+
+// 6. ROTALAR
+app.MapRazorPages();
+
 app.MapControllerRoute(
     name: "areas",
-    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+    pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
     name: "default",
