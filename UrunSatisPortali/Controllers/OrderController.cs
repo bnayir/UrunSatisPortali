@@ -9,12 +9,12 @@ using UrunSatisPortali.Models;
 public class OrderController : Controller
 {
     private readonly IRepository<Order> _orderRepo;
-    private readonly IRepository<Product> _productRepo; // Ürün stoğu için eklendi
+    private readonly IRepository<Product> _productRepo;
     private readonly UserManager<IdentityUser> _userManager;
 
     public OrderController(
         IRepository<Order> orderRepo,
-        IRepository<Product> productRepo, // Constructor'a eklendi
+        IRepository<Product> productRepo,
         UserManager<IdentityUser> userManager)
     {
         _orderRepo = orderRepo;
@@ -26,7 +26,6 @@ public class OrderController : Controller
     public IActionResult Index()
     {
         var userId = _userManager.GetUserId(User);
-        // Sadece giriş yapan kullanıcıya ait siparişleri çekiyoruz
         var orders = _orderRepo.GetAll()
             .Where(x => x.UserId == userId)
             .OrderByDescending(x => x.OrderDate)
@@ -44,13 +43,13 @@ public class OrderController : Controller
 
         var cartItems = JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
 
-        // Checkout sayfasındaki "Özet" kısmında toplam fiyatın görünmesi için
+        // Sepet toplamını hesaplayıp sayfaya gönderiyoruz
         ViewBag.TotalPrice = cartItems.Sum(x => x.Price * x.Quantity);
 
         return View(new Order());
     }
 
-    // Siparişi onaylama ve veritabanına kayıt işlemi
+    // Siparişi onaylama, stok düşürme ve satış sayısını artırma
     [HttpPost]
     [ValidateAntiForgeryToken]
     public IActionResult Checkout(Order order)
@@ -60,40 +59,50 @@ public class OrderController : Controller
 
         if (string.IsNullOrEmpty(cartJson)) return RedirectToAction("Index", "Home");
 
-        // 1. Sepet verilerini listeye çevir
         var cartItems = JsonConvert.DeserializeObject<List<CartItem>>(cartJson);
 
-        // 2. Siparişin temel bilgilerini ata
+        // 1. Siparişin temel bilgilerini ata
         order.UserId = userId;
         order.OrderDate = DateTime.Now;
         order.TotalPrice = cartItems.Sum(x => x.Price * x.Quantity);
 
-        // 3. STOK GÜNCELLEME İŞLEMİ
+        // 2. STOK VE SATIŞ SAYACI GÜNCELLEME
         foreach (var item in cartItems)
         {
-            // Veritabanından ürünün güncel halini bul
             var product = _productRepo.GetById(item.ProductId);
             if (product != null)
             {
-                // Stoğu sipariş miktarı kadar azalt
+                // Stoktan düşüyoruz
                 product.Stock -= item.Quantity;
-
-                // Stok eksiye düşmesin kontrolü
                 if (product.Stock < 0) product.Stock = 0;
 
-                // Ürünü güncelle (Veritabanına yansıtır)
+                // Satış sayacını artırıyoruz (Anasayfa için)
+                product.SalesCount += item.Quantity;
+
                 _productRepo.Update(product);
             }
         }
 
-        // 4. Siparişi Kaydet
+        // 3. Siparişi Kaydet
         _orderRepo.Add(order);
 
-        // 5. SEPETİ TEMİZLE
+        // 4. SEPETİ TEMİZLE
         HttpContext.Session.Remove("CartSession");
         HttpContext.Session.Remove("CartCount");
 
-        // Kullanıcıya sipariş numarasını gönderen başarı sayfasına yönlendir
+        // Başarı sayfasına yönlendir
         return View("OrderSuccess", order.Id);
+    }
+
+    // Sipariş Detayı
+    public IActionResult Details(int id)
+    {
+        var userId = _userManager.GetUserId(User);
+        var order = _orderRepo.GetById(id);
+
+        // Güvenlik: Kullanıcı sadece kendi sipariş detayını görmeli
+        if (order == null || order.UserId != userId) return NotFound();
+
+        return View(order);
     }
 }

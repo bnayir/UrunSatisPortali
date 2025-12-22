@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity; // Eklendi
 using UrunSatisPortali.Data;
 using UrunSatisPortali.Models;
 
@@ -12,50 +13,45 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
         private readonly IRepository<Product> _productRepo;
         private readonly IRepository<Category> _categoryRepo;
         private readonly IRepository<Brand> _brandRepo;
-        private readonly IRepository<Comment> _commentRepo;
         private readonly IRepository<Message> _messageRepo;
+        private readonly IRepository<Order> _orderRepo; // Sipariş tablosu eklendi
+        private readonly UserManager<IdentityUser> _userManager; // Müşteri sayısı için
 
         public DashboardController(
             IRepository<Product> productRepo,
             IRepository<Category> categoryRepo,
             IRepository<Brand> brandRepo,
-            IRepository<Comment> commentRepo,
-            IRepository<Message> messageRepo)
+            IRepository<Message> messageRepo,
+            IRepository<Order> orderRepo,
+            UserManager<IdentityUser> userManager)
         {
             _productRepo = productRepo;
             _categoryRepo = categoryRepo;
             _brandRepo = brandRepo;
-            _commentRepo = commentRepo;
             _messageRepo = messageRepo;
+            _orderRepo = orderRepo;
+            _userManager = userManager;
         }
 
         public IActionResult Index()
         {
-            // 1. ÜST KART İSTATİSTİKLERİ
+            // 1. ÜST KART İSTATİSTİKLERİ (GERÇEK VERİLER)
+            var orders = _orderRepo.GetAll()?.ToList() ?? new List<Order>();
+
+            ViewBag.TotalSales = orders.Sum(x => x.TotalPrice); // Sahte 12500 silindi, gerçek toplam geldi
+            ViewBag.OrderCount = orders.Count; // Gerçek sipariş sayısı
+            ViewBag.UserCount = _userManager.Users.Count(); // Gerçek kayıtlı müşteri sayısı
             ViewBag.ProductCount = _productRepo.GetAll()?.Count() ?? 0;
-            ViewBag.CategoryCount = _categoryRepo.GetAll()?.Count() ?? 0;
-            ViewBag.BrandCount = _brandRepo.GetAll()?.Count() ?? 0;
-            ViewBag.CommentCount = _commentRepo.GetAll()?.Count() ?? 0;
 
-            // Dashboard tasarımı için gerekli simülasyon verileri
-            ViewBag.TotalSales = 12500.75m;
-            ViewBag.OrderCount = 24;
-            ViewBag.UserCount = 8;
-
-            // 2. MESAJLAR - GÜNCELLENMİŞ KISIM
-            // Önce tüm mesajları listeye alıyoruz ki null hatası almayalım
+            // 2. MESAJLAR
             var allMessages = _messageRepo.GetAll()?.ToList() ?? new List<Message>();
-
-            // Okunmamış mesaj sayısını IsRead durumuna göre filtreliyoruz
             ViewBag.NewMessagesCount = allMessages.Count(x => !x.IsRead);
-
-            // Son 5 mesajı tarihe göre sıralayıp ViewBag'e gönderiyoruz
             ViewBag.RecentMessages = allMessages
                                         .OrderByDescending(x => x.CreatedDate)
                                         .Take(5)
                                         .ToList();
 
-            // 3. GRAFİK VERİLERİ
+            // 3. GRAFİK VERİLERİ (Kategori Dağılımı)
             var categoryGroup = _productRepo.GetAll("Category")?
                 .GroupBy(p => p.Category?.Name ?? "Kategorisiz")
                 .Select(g => new { Isim = g.Key, Adet = g.Count() })
@@ -66,32 +62,25 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
                 ViewBag.CategoryLabels = categoryGroup.Select(x => x.Isim).ToArray();
                 ViewBag.CategoryCounts = categoryGroup.Select(x => x.Adet).ToArray();
             }
-            else
-            {
-                ViewBag.CategoryLabels = new string[] { "Veri Yok" };
-                ViewBag.CategoryCounts = new int[] { 0 };
-            }
 
-            // 4. ANALİZLER (Top Products)
-            ViewBag.TopProducts = _productRepo.GetAll("Comments")?
-                .OrderByDescending(p => p.Comments?.Count() ?? 0)
+            // 4. ANALİZLER (En Çok Satan 5 Ürün)
+            // Yorum sayısına göre değil, SalesCount alanına göre sıralıyoruz
+            ViewBag.TopProducts = _productRepo.GetAll()?
+                .OrderByDescending(p => p.SalesCount)
                 .Take(5)
                 .Select(p => new {
                     Name = p.Name,
-                    TotalSales = (p.Comments?.Count() ?? 0) + 5,
+                    SalesCount = p.SalesCount, // Kendi modelindeki alan
                     Stock = p.Stock,
-                    Price = p.Price
+                    Price = p.Price,
+                    Image = p.Image
                 }).ToList();
 
-            // Kategori Satış Simülasyonu
-            ViewBag.CategorySalesLabels = _categoryRepo.GetAll()?.Select(x => x.Name).ToArray() ?? new string[0];
-            ViewBag.CategorySalesCounts = _categoryRepo.GetAll()?.Select(x => new Random().Next(10, 50)).ToArray() ?? new int[0];
-
-            // Sayfanın altına son eklenen ürünleri model olarak gönderiyoruz
+            // 5. SON EKLENEN ÜRÜNLER (Model olarak döner)
             var lastProducts = _productRepo.GetAll("Category")?
-                                .OrderByDescending(p => p.CreatedDate)
-                                .Take(5)
-                                .ToList() ?? new List<Product>();
+                                 .OrderByDescending(p => p.CreatedDate)
+                                 .Take(5)
+                                 .ToList() ?? new List<Product>();
 
             return View(lastProducts);
         }

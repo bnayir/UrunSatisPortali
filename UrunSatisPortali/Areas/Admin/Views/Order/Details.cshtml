@@ -1,0 +1,42 @@
+﻿@model UrunSatisPortali.Models.Order
+@{
+    ViewData["Title"] = "Sipariş Yönetimi";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header bg-dark p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="text-white mb-0">Sipariş No: #ORD-@Model.Id</h5>
+                        <span class="badge bg-success">Ödeme Alındı (Kapıda)</span>
+                    </div>
+                </div>
+                <div class="card-body p-4 bg-white">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-uppercase text-muted small fw-bold">Müşteri Bilgileri</h6>
+                            <p class="mb-1"><strong>Ad Soyad:</strong> @Model.FirstName @Model.LastName</p>
+                            <p class="mb-1"><strong>Telefon:</strong> @Model.Phone</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-uppercase text-muted small fw-bold">Teslimat Adresi</h6>
+                            <p class="mb-1"><strong>Şehir:</strong> @Model.City</p>
+                            <p class="mb-0"><strong>Adres:</strong> @Model.Address</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-light p-3 rounded-3 d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">Toplam Tahsil Edilecek Tutar:</span>
+                        <h4 class="text-primary fw-bolder m-0">@Model.TotalPrice.ToString("C2")</h4>
+                    </div>
+                </div>
+                <div class="card-footer bg-white p-3 border-top-0">
+                    <a asp-action="Index" class="btn btn-outline-dark rounded-pill px-4">Listeye Dön</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

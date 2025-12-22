@@ -30,5 +30,6 @@ namespace UrunSatisPortali.Models
         [ValidateNever]
         public Brand Brand { get; set; } // Navigation Property
         public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
+        public int SalesCount { get; set; } = 0; // Satış adedini tutacak alan
     }
 }

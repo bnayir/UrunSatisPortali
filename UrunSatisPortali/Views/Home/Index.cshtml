@@ -62,6 +62,15 @@
                             <div class="position-relative">
                                 <img src="@item.Image" class="card-img-top p-4 rounded-5" alt="@item.Name"
                                      style="height: 280px; object-fit: contain;">
+
+                                @* STOK DURUMU ROZETİ *@
+                                @if (item.Stock <= 0)
+                                {
+                                    <div class="position-absolute top-50 start-50 translate-middle w-100 text-center">
+                                        <span class="badge bg-danger px-3 py-2 shadow-lg rounded-pill opacity-90 fw-bold">TÜKENDİ</span>
+                                    </div>
+                                }
+
                                 <div class="position-absolute top-0 start-0 m-3">
                                     <a asp-controller="Wishlist" asp-action="AddToWishlist" asp-route-id="@item.Id"
                                        class="btn btn-white shadow-sm rounded-circle p-2 wishlist-btn" style="background:white; border:none;">
@@ -78,17 +87,28 @@
                             </div>
                             <div class="card-body p-4 text-center">
                                 <p class="text-muted small fw-bold mb-1">@item.Brand?.Name</p>
-                                <h5 class="fw-bold mb-3 text-dark text-truncate">@item.Name</h5>
+                                <h5 class="fw-bold mb-2 text-dark text-truncate">@item.Name</h5>
+
+                                @* SATIŞ VE STOK BİLGİSİ *@
+                                <div class="d-flex justify-content-between align-items-center mb-3 px-1">
+                                    <span class="text-muted small"><i class="fas fa-fire text-danger me-1"></i>@item.SalesCount Satıldı</span>
+                                    @if (item.Stock > 0)
+                                    {
+                                        <span class="text-success small fw-bold">Stok: @item.Stock</span>
+                                    }
+                                </div>
+
                                 <div class="mb-3">
                                     <span class="h4 fw-extra-bold text-primary mb-0">@item.Price.ToString("C2")</span>
                                 </div>
 
                                 <div class="d-grid gap-2">
+                                    @* STOK KONTROLÜNE GÖRE BUTON DURUMU *@
                                     <a asp-controller="Cart" asp-action="AddToCart" asp-route-id="@item.Id"
-                                       class="btn btn-primary rounded-pill py-2 fw-bold shadow-sm">
-                                        <i class="fas fa-shopping-basket me-2"></i>Sepete Ekle
+                                       class="btn btn-primary rounded-pill py-2 fw-bold shadow-sm @(item.Stock <= 0 ? "disabled" : "")">
+                                        <i class="fas fa-shopping-basket me-2"></i>@(item.Stock <= 0 ? "Stokta Yok" : "Sepete Ekle")
                                     </a>
-                                    @* GERİ GELEN İNCELE BUTONU *@
+
                                     <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id"
                                        class="btn btn-light rounded-pill py-2 text-muted fw-bold border-0">
                                         Detayları İncele
@@ -141,6 +161,10 @@
         .product-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+        }
+        /* Stokta olmayan ürünleri solduran efekt */
+        .product-card.disabled-style {
+            opacity: 0.7;
         }
 
     .suggestion-card {

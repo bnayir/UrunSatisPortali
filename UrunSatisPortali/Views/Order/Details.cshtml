@@ -1,0 +1,38 @@
+﻿@model UrunSatisPortali.Models.Order
+@{
+    ViewData["Title"] = "Sipariş Detayı";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5">
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+        <div class="card-header bg-primary text-white p-4">
+            <h4 class="mb-0"><i class="fas fa-file-invoice me-2"></i>Sipariş Detayı: #ORD-@Model.Id</h4>
+        </div>
+        <div class="card-body p-4 bg-white">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h5 class="fw-bold border-bottom pb-2">Müşteri Bilgileri</h5>
+                    <p class="mb-1"><strong>Ad Soyad:</strong> @Model.FirstName @Model.LastName</p>
+                    <p class="mb-1"><strong>Telefon:</strong> @Model.Phone</p>
+                    <p class="mb-0"><strong>Tarih:</strong> @Model.OrderDate.ToString("dd.MM.yyyy HH:mm")</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="fw-bold border-bottom pb-2">Teslimat Adresi</h5>
+                    <p class="mb-1"><strong>Şehir:</strong> @Model.City</p>
+                    <p class="mb-0"><strong>Adres:</strong> @Model.Address</p>
+                </div>
+            </div>
+
+            <hr class="my-4 opacity-25">
+
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="fw-extra-bold m-0">Toplam Ödenen:</h4>
+                <h3 class="text-primary fw-extra-bold m-0">@Model.TotalPrice.ToString("C2")</h3>
+            </div>
+        </div>
+        <div class="card-footer bg-light p-3 text-end">
+            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">Siparişlerime Dön</a>
+        </div>
+    </div>
+</div>
