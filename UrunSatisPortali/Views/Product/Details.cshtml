@@ -10,6 +10,11 @@
     var wishlistIds = wishlistJson != null
         ? JsonConvert.DeserializeObject<List<UrunSatisPortali.Models.Product>>(wishlistJson).Select(x => x.Id).ToList()
         : new List<int>();
+
+    // Ortalama Puan Hesaplama
+    double averageRating = Model.Comments != null && Model.Comments.Any()
+        ? Model.Comments.Average(x => x.Rating)
+        : 0;
 }
 
 <div class="container py-5">
@@ -39,7 +44,6 @@
                         }
                         else
                         {
-
                             <i class="far fa-heart fs-4 text-danger"></i>
                         }
                     </a>
@@ -47,9 +51,18 @@
             </div>
 
             <div class="col-md-6 p-5 d-flex flex-column justify-content-center">
-                <div class="mb-2">
+                <div class="mb-2 d-flex align-items-center gap-2">
                     <span class="badge px-3 py-2 rounded-pill fw-bold" style="background: #eef2ff; color: #3b82f6;">@Model.Brand?.Name</span>
+                    @* ORTALAMA PUAN GÖSTERGESİ *@
+                    <div class="text-warning small">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <i class="@(i <= Math.Round(averageRating) ? "fas" : "far") fa-star"></i>
+                        }
+                        <span class="text-muted ms-1">(@averageRating.ToString("0.0"))</span>
+                    </div>
                 </div>
+
                 <h1 class="display-5 fw-extra-bold text-dark mb-3">@Model.Name</h1>
 
                 <div class="d-flex align-items-center mb-4">
@@ -93,7 +106,16 @@
                 {
                     <div class="card border-0 shadow-sm rounded-4 p-4 mb-3 bg-white comment-card">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="fw-bold text-primary mb-0">@(comment.User?.UserName ?? "Kullanıcı")</h6>
+                            <div>
+                                <h6 class="fw-bold text-primary mb-0">@(comment.User?.UserName ?? "Kullanıcı")</h6>
+                                @* YORUM PUANI *@
+                                <div class="text-warning small mt-1">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="@(i <= comment.Rating ? "fas" : "far") fa-star"></i>
+                                    }
+                                </div>
+                            </div>
                             <small class="text-muted small">@comment.CreatedDate.ToString("dd.MM.yyyy")</small>
                         </div>
                         <p class="mb-0 small text-secondary">@comment.Content</p>
@@ -110,14 +132,28 @@
 
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 p-4 sticky-top" style="top: 100px;">
-                <h5 class="fw-bold mb-3">Yorum Yap</h5>
+                <h5 class="fw-bold mb-3">Ürünü Değerlendir</h5>
                 @if (User.Identity.IsAuthenticated)
                 {
                     <form asp-controller="Product" asp-action="AddComment" method="post">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="ProductId" value="@Model.Id" />
+
+                        @* İNTERAKTİF YILDIZ SEÇİMİ *@
+                        <div class="mb-3 text-center">
+                            <div class="rating-input text-warning fs-3 mb-2" style="cursor: pointer;">
+                                <i class="fas fa-star star-option" data-value="1"></i>
+                                <i class="fas fa-star star-option" data-value="2"></i>
+                                <i class="fas fa-star star-option" data-value="3"></i>
+                                <i class="fas fa-star star-option" data-value="4"></i>
+                                <i class="fas fa-star star-option" data-value="5"></i>
+                            </div>
+                            <input type="hidden" name="Rating" id="selectedRating" value="5">
+                            <p class="small text-muted" id="ratingText">Harika!</p>
+                        </div>
+
                         <div class="mb-3">
-                            <textarea name="Content" class="form-control rounded-4 bg-light border-0 shadow-none" rows="4" placeholder="Ürünü değerlendirin..." required></textarea>
+                            <textarea name="Content" class="form-control rounded-4 bg-light border-0 shadow-none" rows="4" placeholder="Deneyiminizi paylaşın..." required></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold shadow-sm py-2">Gönder</button>
                     </form>
@@ -125,7 +161,7 @@
                 else
                 {
                     <div class="text-center py-3">
-                        <p class="small text-muted mb-3">Yorum yapabilmek için giriş yapmalısınız.</p>
+                        <p class="small text-muted mb-3">Değerlendirme yapabilmek için giriş yapmalısınız.</p>
                         <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-primary btn-sm rounded-pill px-4">Giriş Yap</a>
                     </div>
                 }
@@ -133,7 +169,7 @@
         </div>
     </div>
 
-    @* --- İLGİNİZİ ÇEKEBİLECEK ÜRÜNLER (TAM DÜZELTME) --- *@
+    @* --- İLGİNİZİ ÇEKEBİLECEK ÜRÜNLER --- *@
     @if (ViewBag.RelatedProducts != null)
     {
         var relatedList = (IEnumerable<UrunSatisPortali.Models.Product>)ViewBag.RelatedProducts;
@@ -160,33 +196,6 @@
                         </div>
                     }
                 </div>
-            </div>
-        }
-    }
-</div>
-@* --- ÜRÜN DETAY SAYFASININ EN ALTINA EKLE --- *@
-<div class="container mt-5 pt-5 border-top">
-    @if (ViewBag.SuggestedProducts != null)
-    {
-        var suggestions = (IEnumerable<UrunSatisPortali.Models.Product>)ViewBag.SuggestedProducts;
-        if (suggestions.Any())
-        {
-            <h4 class="fw-bold text-dark mb-4">
-                <i class="fas fa-magic text-primary me-2"></i>Bu Ürünü Sevenler Şunlara da <span class="text-primary">Göz Attı</span>
-            </h4>
-            <div class="row g-4">
-                @foreach (var sug in suggestions)
-                {
-                    <div class="col-md-3">
-                        <div class="card h-100 border-0 shadow-sm rounded-4 text-center p-3 suggestion-card bg-white">
-                            <a asp-action="Details" asp-controller="Product" asp-route-id="@sug.Id" class="text-decoration-none">
-                                <img src="@sug.Image" class="img-fluid mb-2" style="height: 140px; object-fit: contain;" alt="@sug.Name">
-                                <h6 class="fw-bold text-dark small text-truncate">@sug.Name</h6>
-                                <p class="text-primary fw-bold small mb-0">@sug.Price.ToString("C2")</p>
-                            </a>
-                        </div>
-                    </div>
-                }
             </div>
         }
     }
@@ -220,10 +229,48 @@
 
     .comment-card:hover {
         transform: translateX(5px);
+        transition: 0.3s;
     }
 
     .breadcrumb-item + .breadcrumb-item::before {
         content: "•";
         color: #cbd5e1;
     }
+
+    /* Yıldız Seçim Efekti */
+    .star-option {
+        transition: 0.2s;
+    }
+
+        .star-option:hover {
+            transform: scale(1.2);
+        }
 </style>
+
+@section Scripts {
+    <script>
+        // Yıldız Seçim Mantığı
+        const stars = document.querySelectorAll('.star-option');
+        const ratingInput = document.getElementById('selectedRating');
+        const ratingText = document.getElementById('ratingText');
+        const labels = ["Çok Kötü", "Kötü", "Normal", "İyi", "Harika!"];
+
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                const val = parseInt(this.getAttribute('data-value'));
+                ratingInput.value = val;
+                ratingText.innerText = labels[val - 1];
+
+                stars.forEach((s, index) => {
+                    if (index < val) {
+                        s.classList.replace('far', 'fas');
+                        s.style.color = "#ffc107";
+                    } else {
+                        s.classList.replace('fas', 'far');
+                        s.style.color = "#cbd5e1";
+                    }
+                });
+            });
+        });
+    </script>
+}

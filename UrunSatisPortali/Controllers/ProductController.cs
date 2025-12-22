@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using UrunSatisPortali.Data;
 using UrunSatisPortali.Models;
 using System.Linq;
+using System;
 
 namespace UrunSatisPortali.Controllers
 {
@@ -24,11 +25,12 @@ namespace UrunSatisPortali.Controllers
 
         public IActionResult Details(int id)
         {
-            // Mevcut ürünü çekiyoruz
+            // Mevcut ürünü tüm ilişkili tablolarıyla birlikte çekiyoruz
             var product = _productRepo.GetAll("Category,Brand,Comments.User").FirstOrDefault(x => x.Id == id);
+
             if (product == null) return NotFound();
 
-            // ÖNEMLİ: Details sayfasında görünecek öneri ürünlerini burada hazırlıyoruz
+            // ÖNEMLİ: Details sayfasında görünecek öneri ürünlerini hazırlıyoruz
             ViewBag.SuggestedProducts = _productRepo.GetAll("Category,Brand")
                                                     .Where(x => x.Id != id) // Bakılan ürünü listeden çıkar
                                                     .OrderBy(x => Guid.NewGuid())
@@ -39,26 +41,31 @@ namespace UrunSatisPortali.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken] // Güvenlik için eklendi
-        public IActionResult AddComment(int ProductId, string Content)
+        [ValidateAntiForgeryToken]
+        // Rating parametresi View'dan gelen veriyi yakalamak için eklendi
+        public IActionResult AddComment(int ProductId, string Content, int Rating)
         {
+            // Kullanıcı girişi kontrolü
             if (!User.Identity.IsAuthenticated) return Unauthorized();
 
             var userId = _userManager.GetUserId(User);
 
+            // Gelen verilerin geçerlilik kontrolü
             if (!string.IsNullOrEmpty(Content) && userId != null)
             {
                 var comment = new Comment
                 {
                     ProductId = ProductId,
                     Content = Content,
+                    Rating = Rating > 0 ? Rating : 5, // Eğer puan gelmezse varsayılan 5 yap
                     UserId = userId,
                     CreatedDate = DateTime.Now
                 };
 
-                _commentRepo.Add(comment); // Kayıt işlemi
+                _commentRepo.Add(comment); // Veritabanına kayıt işlemi
             }
 
+            // Sayfayı yenileyerek yorumu göster
             return RedirectToAction("Details", new { id = ProductId });
         }
     }

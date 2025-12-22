@@ -144,24 +144,19 @@
                             </a>
                         </li>
 
-                        @* --- ALT MENÜLÜ KATEGORİLER (ID'LER GÜNCELLENDİ) --- *@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle text-dark" href="#" id="catDrop" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-th-large me-1 opacity-50"></i> Kategoriler
                             </a>
                             <ul class="dropdown-menu shadow-lg border-0 mt-2 animate slideIn" aria-labelledby="catDrop">
                                 <li class="dropdown-header fw-bold text-uppercase">Makyaj</li>
-                                @* DİKKAT: asp-route-categoryId değerlerini SQL tablonuzdaki gerçek Id'ler ile değiştirin! *@
                                 <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Index" asp-route-categoryId="1"><i class="fas fa-chevron-right me-2 small text-primary"></i>Dudak Makyajı</a></li>
                                 <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Index" asp-route-categoryId="15"><i class="fas fa-chevron-right me-2 small text-primary"></i>Göz Makyajı</a></li>
                                 <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Index" asp-route-categoryId="3"><i class="fas fa-chevron-right me-2 small text-primary"></i>Ten Makyajı</a></li>
-
                                 <li><hr class="dropdown-divider"></li>
-
                                 <li class="dropdown-header fw-bold text-uppercase">Cilt Bakımı</li>
                                 <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Index" asp-route-categoryId="4"><i class="fas fa-leaf me-2 small text-success"></i>Serumlar</a></li>
                                 <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Index" asp-route-categoryId="5"><i class="fas fa-sun me-2 small text-warning"></i>Güneş Kremleri</a></li>
-
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item fw-bold text-center text-primary" asp-area="" asp-controller="Home" asp-action="Index">Tüm Kategoriler</a></li>
                             </ul>
@@ -242,8 +237,24 @@
         @RenderBody()
     </main>
 
-    <footer class="bg-white border-top py-5 mt-auto">
-        <div class="container">
+    <footer class="bg-white border-top mt-auto">
+        @* --- NEWSLETTER SECTION (GÜNCELLENDİ) --- *@
+        <div class="newsletter-section py-5 bg-dark text-white text-center shadow-lg">
+            <div class="container">
+                <h3 class="mb-2 fw-bold">Kampanyalardan İlk Sizin Haberiniz Olsun!</h3>
+                <p class="mb-4 text-white-50">En yeni ürünler ve özel indirimler e-posta adresinize gelsin.</p>
+                <div class="row justify-content-center">
+                    <div class="col-md-6 col-lg-5">
+                        <form id="subscribeForm" class="input-group">
+                            <input type="email" name="email" id="subEmail" class="form-control rounded-pill-start px-4 border-0" placeholder="E-posta adresiniz..." required>
+                            <button type="button" onclick="submitNewsletter()" class="btn btn-primary rounded-pill-end px-4 fw-bold">Abone Ol</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container py-5">
             <div class="row align-items-center">
                 <div class="col-md-4 mb-3 mb-md-0">
                     <h5 class="fw-bold text-primary mb-0"><i class="fas fa-magic me-2"></i>KOZMETİK PORTALI</h5>
@@ -268,6 +279,32 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @* --- JAVASCRIPT HATA DÜZELTME (@@ İLE ESCAPE EDİLDİ) --- *@
+    <script>
+        function submitNewsletter() {
+            var emailInput = document.getElementById("subEmail");
+            var email = emailInput.value.trim();
+
+            // @@ karakteri Razor hatasını önlemek için çiftlendi
+            if (!email || !email.includes("@@")) {
+                alert("Lütfen geçerli bir e-posta adresi giriniz.");
+                return;
+            }
+
+            $.post("/Home/Subscribe", { email: email }, function (response) {
+                if (response.success) {
+                    alert(response.message); //
+                    emailInput.value = "";
+                } else {
+                    alert(response.message); //
+                }
+            }).fail(function() {
+                alert("Bağlantı hatası oluştu, lütfen daha sonra tekrar deneyiniz.");
+            });
+        }
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

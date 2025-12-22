@@ -10,6 +10,7 @@ namespace UrunSatisPortali.Models
         public int Id { get; set; }
         [Required]
         public string Content { get; set; } // Yorum metni
+        public int Rating { get; set; } // 1 ile 5 arasında değer tutacak
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 
         // Ürün ile ilişki
