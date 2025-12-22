@@ -1,0 +1,107 @@
+﻿@model UrunSatisPortali.Models.Order
+
+@{
+    ViewData["Title"] = "Siparişi Tamamla";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5">
+    <div class="row g-5">
+        @* --- SOL TARAF: ADRES VE TESLİMAT BİLGİLERİ --- *@
+        <div class="col-md-7 col-lg-8">
+            <div class="card border-0 shadow-sm rounded-5 p-4 bg-white">
+                <h4 class="mb-4 fw-extra-bold text-dark border-bottom pb-3">
+                    <i class="fas fa-map-marker-alt me-2 text-primary"></i>Teslimat Bilgileri
+                </h4>
+
+                <form asp-controller="Order" asp-action="Checkout" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="row g-3">
+                        <div class="col-sm-6">
+                            <label class="form-label fw-bold small text-muted">Adınız</label>
+                            <input asp-for="FirstName" class="form-control rounded-pill border-light bg-light py-2 px-3 shadow-none" required>
+                        </div>
+
+                        <div class="col-sm-6">
+                            <label class="form-label fw-bold small text-muted">Soyadınız</label>
+                            <input asp-for="LastName" class="form-control rounded-pill border-light bg-light py-2 px-3 shadow-none" required>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold small text-muted">Telefon Numaranız</label>
+                            <input asp-for="Phone" class="form-control rounded-pill border-light bg-light py-2 px-3 shadow-none" placeholder="05xx xxx xx xx" required>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold small text-muted">Şehir</label>
+                            <input asp-for="City" class="form-control rounded-pill border-light bg-light py-2 px-3 shadow-none" required>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold small text-muted">Açık Adres</label>
+                            <textarea asp-for="Address" class="form-control rounded-4 border-light bg-light py-2 px-3 shadow-none" rows="3" placeholder="Mahalle, sokak, bina no..." required></textarea>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 opacity-25">
+
+                    <h4 class="mb-4 fw-extra-bold text-dark"><i class="fas fa-credit-card me-2 text-primary"></i>Ödeme Yöntemi</h4>
+                    <div class="alert alert-info rounded-4 border-0 small">
+                        <i class="fas fa-info-circle me-2"></i> Şimdilik sadece <strong>Kapıda Ödeme</strong> seçeneği aktiftir.
+                    </div>
+
+                    <button class="w-100 btn btn-primary btn-lg rounded-pill fw-bold py-3 mt-4 shadow-sm transition-up" type="submit">
+                        Siparişi Onayla ve Bitir
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        @* --- SAĞ TARAF: SİPARİŞ ÖZETİ --- *@
+        <div class="col-md-5 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-5 p-4 bg-white sticky-top" style="top: 100px;">
+                <h5 class="fw-bold text-dark mb-4 border-bottom pb-2">Sipariş Özeti</h5>
+
+                @* Not: Eğer sepet verilerini ViewBag ile gönderdiysen burada listeleyebilirsin *@
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted small">Ara Toplam</span>
+                    <span class="fw-bold">@ViewBag.TotalPrice?.ToString("C2")</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted small">Kargo</span>
+                    <span class="text-success fw-bold small">Ücretsiz</span>
+                </div>
+
+                <hr class="my-3 opacity-25">
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-extra-bold text-dark">Genel Toplam</span>
+                    <h3 class="text-primary fw-extra-bold m-0">@ViewBag.TotalPrice?.ToString("C2")</h3>
+                </div>
+
+                <div class="mt-4 p-3 bg-light rounded-4 small text-muted">
+                    <i class="fas fa-shield-alt text-success me-2"></i> 256-bit SSL güvenli ödeme altyapısı ile bilgileriniz korunmaktadır.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-extra-bold {
+        font-weight: 800;
+    }
+
+    .transition-up {
+        transition: transform 0.2s;
+    }
+
+        .transition-up:hover {
+            transform: translateY(-3px);
+        }
+
+    .form-control:focus {
+        border-color: #3b82f6 !important;
+        background-color: #fff !important;
+    }
+</style>

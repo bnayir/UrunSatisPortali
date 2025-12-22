@@ -1,6 +1,133 @@
-﻿<div class="container mt-5">
-    <h2 class="fw-bold mb-4">Sipariş Geçmişim</h2>
-    <div class="alert alert-light border shadow-sm">
-        <p class="mb-0 text-muted">Henüz verilmiş bir siparişiniz bulunmamaktadır.</p>
+﻿@model IEnumerable<UrunSatisPortali.Models.Order>
+
+@{
+    ViewData["Title"] = "Siparişlerim";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5">
+    @* --- BAŞLIK VE ÖZET BİLGİ --- *@
+    <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom">
+        <div>
+            <h3 class="fw-extra-bold m-0 text-dark">
+                <i class="fas fa-box-open text-primary me-2"></i>Siparişlerim
+            </h3>
+            <p class="text-muted small mb-0 mt-1">Geçmiş siparişlerinizi buradan takip edebilirsiniz.</p>
+        </div>
+        <span class="badge bg-primary rounded-pill px-3 py-2 shadow-sm">
+            Toplam @Model.Count() Sipariş
+        </span>
     </div>
+
+    @* --- SİPARİŞ LİSTESİ --- *@
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5 bg-white rounded-5 shadow-sm border border-light">
+            <div class="mb-4">
+                <div class="icon-circle bg-light d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 100px; height: 100px;">
+                    <i class="fas fa-shopping-bag fa-3x text-muted opacity-50"></i>
+                </div>
+            </div>
+            <h4 class="fw-bold text-dark">Henüz bir siparişiniz bulunmuyor</h4>
+            <p class="text-muted mb-4">Size özel fırsatları keşfetmek için ürünlerimize göz atın.</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary rounded-pill px-5 py-3 fw-bold shadow-sm transition-up">
+                Alışverişe Başla
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive shadow-sm rounded-4 border bg-white">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="p-4 border-0 text-secondary small text-uppercase fw-bold">Sipariş Bilgisi</th>
+                        <th class="p-4 border-0 text-secondary small text-uppercase fw-bold">Tarih</th>
+                        <th class="p-4 border-0 text-secondary small text-uppercase fw-bold">Teslimat Adresi</th>
+                        <th class="p-4 border-0 text-secondary small text-uppercase fw-bold">Toplam Tutar</th>
+                        <th class="p-4 border-0 text-secondary small text-uppercase fw-bold text-end">Durum / İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="p-4">
+                                <span class="fw-bold text-dark d-block">#ORD-@item.Id.ToString().PadLeft(5, '0')</span>
+                                <span class="text-muted x-small">Dijital Sipariş</span>
+                            </td>
+                            <td class="p-4">
+                                <span class="text-dark d-block">@item.OrderDate.ToString("dd MMM yyyy")</span>
+                                <span class="text-muted x-small">@item.OrderDate.ToString("HH:mm")</span>
+                            </td>
+                            <td class="p-4">
+                                <div class="text-muted small text-truncate" style="max-width: 200px;" title="@item.Address">
+                                    <i class="fas fa-map-marker-alt me-1 text-primary opacity-50"></i>
+                                    <strong>@item.City</strong>, @item.Address
+                                </div>
+                            </td>
+                            <td class="p-4">
+                                <span class="fw-extra-bold text-primary fs-5">@item.TotalPrice.ToString("C2")</span>
+                            </td>
+                            <td class="p-4 text-end">
+                                <div class="d-flex justify-content-end align-items-center gap-2">
+                                    <span class="badge bg-soft-success text-success rounded-pill px-3 py-2 small fw-bold">
+                                        <i class="fas fa-check-circle me-1"></i> Tamamlandı
+                                    </span>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-white border rounded-pill px-3 shadow-xs hover-primary">
+                                        <i class="fas fa-eye me-1"></i> İncele
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </div>
+
+<style>
+    .fw-extra-bold {
+        font-weight: 800;
+    }
+
+    .bg-soft-success {
+        background-color: #ecfdf5;
+        color: #10b981;
+    }
+
+    .x-small {
+        font-size: 0.75rem;
+    }
+
+    .hover-primary:hover {
+        background-color: #3b82f6;
+        color: white !important;
+        border-color: #3b82f6;
+    }
+
+    .transition-up {
+        transition: transform 0.2s;
+    }
+
+        .transition-up:hover {
+            transform: translateY(-3px);
+        }
+
+    .table thead th {
+        letter-spacing: 0.05em;
+    }
+
+    .table tbody tr {
+        transition: background-color 0.2s;
+    }
+
+        .table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+    .shadow-xs {
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+</style>

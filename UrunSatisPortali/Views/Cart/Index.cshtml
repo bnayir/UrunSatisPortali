@@ -1,43 +1,143 @@
 ﻿@model List<CartItem>
 
-<div class="container mt-5">
-    <h2 class="mb-4 fw-bold"><i class="bi bi-cart3"></i> Sepetim</h2>
-    <div class="row">
-        <div class="col-md-8">
-            <table class="table align-middle shadow-sm rounded overflow-hidden">
-                <thead class="bg-primary text-white">
-                    <tr>
-                        <th>Ürün</th>
-                        <th>Fiyat</th>
-                        <th>Adet</th>
-                        <th>Toplam</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td class="fw-bold">@item.ProductName</td>
-                            <td>@item.Price.ToString("C2")</td>
-                            <td>@item.Quantity</td>
-                            <td class="text-primary fw-bold">@((item.Price * item.Quantity).ToString("C2"))</td>
-                            <td><a asp-action="Remove" asp-route-id="@item.ProductId" class="btn btn-sm btn-outline-danger">Sil</a></td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+@{
+    ViewData["Title"] = "Sepetim";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container py-5">
+    <h2 class="mb-4 fw-extra-bold text-dark"><i class="fas fa-shopping-cart text-primary me-2"></i>Sepetim</h2>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="text-center py-5 bg-white rounded-5 shadow-sm border">
+            <div class="mb-4">
+                <i class="fas fa-shopping-basket fa-4x text-light"></i>
+            </div>
+            <h4 class="fw-bold">Sepetiniz şu an boş</h4>
+            <p class="text-muted mb-4">Harika ürünlerimize göz atmak ister misiniz?</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm">
+                Alışverişe Başla
+            </a>
         </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm bg-light p-4">
-                <h4 class="fw-bold">Sipariş Özeti</h4>
-                <hr>
-                <div class="d-flex justify-content-between mb-3">
-                    <span>Toplam Tutar:</span>
-                    <span class="h4 text-primary">@Model.Sum(x => x.Price * x.Quantity).ToString("C2")</span>
+    }
+    else
+    {
+        <div class="row g-4">
+            @* --- ÜRÜN LİSTESİ --- *@
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <table class="table align-middle mb-0 bg-white">
+                        <thead class="bg-primary text-white">
+                            <tr>
+                                <th class="p-4 border-0">Ürün</th>
+                                <th class="p-4 border-0 text-center">Fiyat</th>
+                                <th class="p-4 border-0 text-center">Adet</th>
+                                <th class="p-4 border-0 text-center">Toplam</th>
+                                <th class="p-4 border-0"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="p-4">
+                                        <div class="d-flex align-items-center">
+                                            <img src="@item.Product?.Image" class="rounded-3 shadow-sm me-3" style="width: 60px; height: 60px; object-fit: contain; background: #f8f9fa;">
+                                            <div>
+                                                <h6 class="fw-bold mb-0 text-dark">@item.Product?.Name</h6>
+                                                <small class="text-muted">@item.Product?.Brand?.Name</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-center">@item.Price.ToString("C2")</td>
+                                    <td class="p-4">
+                                        <div class="d-flex justify-content-center align-items-center gap-2">
+                                            @* Adet Azaltma *@
+                                            <a asp-action="Decrease" asp-route-id="@item.ProductId" class="btn btn-sm btn-light rounded-circle shadow-xs">
+                                                <i class="fas fa-minus text-muted small"></i>
+                                            </a>
+                                            <span class="fw-bold px-2">@item.Quantity</span>
+                                            @* Adet Artırma *@
+                                            <a asp-action="AddToCart" asp-route-id="@item.ProductId" class="btn btn-sm btn-light rounded-circle shadow-xs">
+                                                <i class="fas fa-plus text-muted small"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                    <td class="p-4 text-center text-primary fw-bold">
+                                        @((item.Price * item.Quantity).ToString("C2"))
+                                    </td>
+                                    <td class="p-4 text-end">
+                                        <a asp-action="Remove" asp-route-id="@item.ProductId" class="text-danger text-decoration-none p-2" title="Sil">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
-                <button class="btn btn-success btn-lg w-100 rounded-pill shadow">Siparişi Tamamla</button>
+            </div>
+
+            @* --- SİPARİŞ ÖZETİ --- *@
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-top" style="top: 100px;">
+                    <h4 class="fw-bold text-dark mb-4 border-bottom pb-2">Sipariş Özeti</h4>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Ara Toplam</span>
+                        <span class="fw-bold text-dark">@Model.Sum(x => x.Price * x.Quantity).ToString("C2")</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="text-muted">Kargo</span>
+                        <span class="text-success fw-bold small">Ücretsiz</span>
+                    </div>
+
+                    <hr class="my-3 opacity-25">
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="h5 fw-bold m-0">Toplam Tutar</span>
+                        <h3 class="text-primary fw-extra-bold m-0">@Model.Sum(x => x.Price * x.Quantity).ToString("C2")</h3>
+                    </div>
+
+                    @* ÖNEMLİ: ÇALIŞMAYAN BUTON DÜZELTİLDİ *@
+                    <a asp-controller="Order" asp-action="Checkout" class="btn btn-success btn-lg w-100 rounded-pill fw-bold py-3 shadow-sm transition-up">
+                        Siparişi Tamamla <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+
+                    <div class="mt-4 text-center">
+                        <a asp-controller="Home" asp-action="Index" class="text-muted small text-decoration-none">
+                            <i class="fas fa-chevron-left me-1"></i> Alışverişe Devam Et
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+    }
 </div>
+
+<style>
+    .fw-extra-bold {
+        font-weight: 800;
+    }
+
+    .shadow-xs {
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .transition-up {
+        transition: transform 0.2s;
+    }
+
+        .transition-up:hover {
+            transform: translateY(-3px);
+        }
+
+    .table tbody tr {
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+        .table tbody tr:last-child {
+            border: none;
+        }
+</style>

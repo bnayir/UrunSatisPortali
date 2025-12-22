@@ -2,59 +2,74 @@
 using UrunSatisPortali.Data;
 using UrunSatisPortali.Models;
 using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json; // JSON serileştirme için gerekli
+using Newtonsoft.Json;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace UrunSatisPortali.Controllers
 {
     public class CartController : Controller
     {
         private readonly IRepository<Product> _productRepo;
-        private const string CartSessionKey = "CartSession"; // Session anahtarı
-        private const string CartCountKey = "CartCount";     // Navbar sayacı için anahtar
+        private const string CartSessionKey = "CartSession";
+        private const string CartCountKey = "CartCount";
 
         public CartController(IRepository<Product> productRepo)
         {
             _productRepo = productRepo;
         }
 
-        // Sepet listesini getiren yardımcı metot
         private List<CartItem> GetCartFromSession()
         {
             var jsonStr = HttpContext.Session.GetString(CartSessionKey);
             return jsonStr == null ? new List<CartItem>() : JsonConvert.DeserializeObject<List<CartItem>>(jsonStr);
         }
 
-        // Sepeti kaydeden ve sayacı güncelleyen yardımcı metot
         private void SaveCartToSession(List<CartItem> cart)
         {
             var jsonStr = JsonConvert.SerializeObject(cart);
             HttpContext.Session.SetString(CartSessionKey, jsonStr);
 
-            // NAVBAR SAYACINI GÜNCELLE
             int totalCount = cart.Sum(x => x.Quantity);
             HttpContext.Session.SetString(CartCountKey, totalCount.ToString());
         }
 
         public IActionResult Index()
         {
-            return View(GetCartFromSession());
+            var cart = GetCartFromSession();
+            // Sepet sayfasında toplam fiyatı göstermek için ViewBag kullanabilirsin
+            ViewBag.TotalPrice = cart.Sum(x => x.Price * x.Quantity);
+            return View(cart);
         }
 
         public IActionResult AddToCart(int id)
         {
+            // Ürünü tüm ilişkileriyle (Marka vb.) çekmek daha iyidir
             var product = _productRepo.GetById(id);
             if (product != null)
             {
                 var cart = GetCartFromSession();
                 var item = cart.FirstOrDefault(x => x.ProductId == id);
 
-                if (item != null) item.Quantity++;
-                else cart.Add(new CartItem { ProductId = id, ProductName = product.Name, Price = product.Price, Quantity = 1 });
+                if (item != null)
+                {
+                    item.Quantity++;
+                }
+                else
+                {
+                    // DÜZELTİLEN KISIM: ProductName yerine Product nesnesini atıyoruz
+                    cart.Add(new CartItem
+                    {
+                        ProductId = id,
+                        Product = product, // Nesne atandığı için ProductName otomatik dolacak
+                        Price = product.Price,
+                        Quantity = 1
+                    });
+                }
 
                 SaveCartToSession(cart);
             }
 
-            // Sepete ekledikten sonra ana sayfaya dön (Kullanıcı alışverişe devam etsin)
             return RedirectToAction("Index", "Home");
         }
 
@@ -63,6 +78,20 @@ namespace UrunSatisPortali.Controllers
             var cart = GetCartFromSession();
             cart.RemoveAll(x => x.ProductId == id);
             SaveCartToSession(cart);
+            return RedirectToAction("Index");
+        }
+
+        // Adet artırma/azaltma için ek yardımcı metotlar (Şık durur)
+        public IActionResult Decrease(int id)
+        {
+            var cart = GetCartFromSession();
+            var item = cart.FirstOrDefault(x => x.ProductId == id);
+            if (item != null)
+            {
+                if (item.Quantity > 1) item.Quantity--;
+                else cart.Remove(item);
+                SaveCartToSession(cart);
+            }
             return RedirectToAction("Index");
         }
     }
