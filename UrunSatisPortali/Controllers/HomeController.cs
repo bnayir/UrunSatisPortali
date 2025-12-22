@@ -1,37 +1,66 @@
 using Microsoft.AspNetCore.Mvc;
 using UrunSatisPortali.Models;
 using UrunSatisPortali.Data;
+using System.Linq;
 
-public class HomeController : Controller
+namespace UrunSatisPortali.Controllers
 {
-    private readonly IRepository<Product> _productRepo;
-    private readonly IRepository<Category> _categoryRepo; // Kategori repository eklendi
-
-    public HomeController(IRepository<Product> productRepo, IRepository<Category> categoryRepo)
+    public class HomeController : Controller
     {
-        _productRepo = productRepo;
-        _categoryRepo = categoryRepo;
-    }
+        private readonly IRepository<Product> _productRepo;
+        private readonly IRepository<Category> _categoryRepo;
 
-    // Parametre olarak categoryId alýyoruz (Filtreleme için)
-    public IActionResult Index(int? categoryId)
-    {
-        // 1. Yan menüdeki kategorileri doldurmak için tüm kategorileri gönderiyoruz
-        ViewBag.Categories = _categoryRepo.GetAll().ToList();
-
-        // 2. Hangi kategorinin seçili olduðunu View'da "mavi" yapmak için tutuyoruz
-        ViewBag.ActiveCategory = categoryId;
-
-        // 3. Ürünleri Marka ve Kategori bilgileriyle birlikte çekiyoruz (Include mantýðý)
-        var productsQuery = _productRepo.GetAll("Category,Brand");
-
-        // 4. Eðer bir kategori seçilmiþse, ürünleri o kategoriye göre filtreliyoruz
-        if (categoryId.HasValue)
+        public HomeController(IRepository<Product> productRepo, IRepository<Category> categoryRepo)
         {
-            productsQuery = productsQuery.Where(x => x.CategoryId == categoryId.Value);
+            _productRepo = productRepo;
+            _categoryRepo = categoryRepo;
         }
 
-        var products = productsQuery.ToList();
-        return View(products);
+        public IActionResult Index(int? categoryId)
+        {
+            // 1. Ana Ürün Sorgusu
+            var productsQuery = _productRepo.GetAll("Category,Brand");
+
+            // 2. Kategori ve Yan Menü Mantýðý
+            if (categoryId.HasValue)
+            {
+                var subCategories = _categoryRepo.GetAll()
+                                                 .Where(x => x.ParentId == categoryId.Value)
+                                                 .ToList();
+
+                if (subCategories.Any())
+                {
+                    // Ana kategori seçildiyse: Alt kategorilerin ürünlerini de getir
+                    var subCategoryIds = subCategories.Select(s => s.Id).ToList();
+                    subCategoryIds.Add(categoryId.Value);
+
+                    productsQuery = productsQuery.Where(x => subCategoryIds.Contains(x.CategoryId));
+                    ViewBag.Categories = subCategories;
+                }
+                else
+                {
+                    // Alt kategori seçildiyse: Sadece o kategoriyi getir
+                    productsQuery = productsQuery.Where(x => x.CategoryId == categoryId.Value);
+                    ViewBag.Categories = _categoryRepo.GetAll().Where(x => x.ParentId == null).ToList();
+                }
+            }
+            else
+            {
+                ViewBag.Categories = _categoryRepo.GetAll().Where(x => x.ParentId == null).ToList();
+            }
+
+            ViewBag.ActiveCategory = categoryId;
+
+            // 3. Ýlginizi Çekebilecek Ürünler (Rastgele 4 Ürün)
+            // Not: Mevcut sayfada filtrelenen ürünlerden farklý olmasý için OrderBy(Guid) kullanýyoruz.
+            ViewBag.SuggestedProducts = _productRepo.GetAll("Category,Brand")
+                                                    .OrderBy(x => Guid.NewGuid())
+                                                    .Take(4)
+                                                    .ToList();
+
+            // 4. Ürünleri Id'ye göre sýrala ve gönder
+            var products = productsQuery.OrderByDescending(x => x.Id).ToList();
+            return View(products);
+        }
     }
 }

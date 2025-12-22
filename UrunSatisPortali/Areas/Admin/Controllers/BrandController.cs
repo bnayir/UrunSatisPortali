@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using UrunSatisPortali.Data;
 using UrunSatisPortali.Models;
 
 namespace UrunSatisPortali.Areas.Admin.Controllers
 {
-    [Area("Admin")] // BURASI ÇOK ÖNEMLİ!
+    [Area("Admin")]
+    [Authorize(Roles = "Admin")] // Sadece admin erişebilir
     public class BrandController : Controller
     {
         private readonly IRepository<Brand> _brandRepo;
@@ -14,15 +16,19 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
             _brandRepo = brandRepo;
         }
 
+        // Listeleme
         public IActionResult Index()
         {
             var brands = _brandRepo.GetAll();
             return View(brands);
         }
 
+        // Yeni Marka Ekleme (Sayfa)
         public IActionResult Create() => View();
 
+        // Yeni Marka Ekleme (İşlem)
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Create(Brand brand)
         {
             if (ModelState.IsValid)
@@ -32,8 +38,8 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
             }
             return View(brand);
         }
-        // BrandController.cs içine eklenecekler:
 
+        // Düzenleme (Sayfa)
         public IActionResult Edit(int id)
         {
             var brand = _brandRepo.GetById(id);
@@ -41,7 +47,9 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
             return View(brand);
         }
 
+        // Düzenleme (İşlem)
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Edit(Brand brand)
         {
             if (ModelState.IsValid)
@@ -50,6 +58,17 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
                 return RedirectToAction(nameof(Index));
             }
             return View(brand);
+        }
+
+        // Silme İşlemi (Yeni Eklendi)
+        public IActionResult Delete(int id)
+        {
+            var brand = _brandRepo.GetById(id);
+            if (brand != null)
+            {
+                _brandRepo.Delete(brand);
+            }
+            return RedirectToAction(nameof(Index));
         }
     }
 }

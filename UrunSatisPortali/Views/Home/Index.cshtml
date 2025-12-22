@@ -3,7 +3,7 @@
 @model IEnumerable<UrunSatisPortali.Models.Product>
 
 @{
-    // Favori listesini Session'dan çekip ID'lerini bir listeye alıyoruz
+    // Favori kontrolü için session'dan listeyi alıyoruz
     var wishlistJson = Context.Session.GetString("WishlistSession");
     var wishlistIds = wishlistJson != null
         ? JsonConvert.DeserializeObject<List<UrunSatisPortali.Models.Product>>(wishlistJson).Select(x => x.Id).ToList()
@@ -16,24 +16,21 @@
          style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
         <div class="row align-items-center position-relative" style="z-index: 2;">
             <div class="col-md-7">
-                <span class="badge bg-primary mb-3 px-3 py-2 rounded-pill fw-bold shadow-sm">YENİ SEZON KOLEKSİYONU</span>
+                <span class="badge bg-primary mb-3 px-3 py-2 rounded-pill fw-bold shadow-sm">YENİ SEZON</span>
                 <h1 class="display-3 fw-extra-bold mb-3 tracking-tight">Güzelliğinizi <span class="text-primary text-gradient">Yeniden Tanımlayın</span></h1>
-                <p class="lead text-white-50 mb-4">Lüks parfümler ve profesyonel kozmetik ürünleri ile kendinizi şımartmanın tam zamanı.</p>
+                <p class="lead text-white-50 mb-4">Lüks parfümler ve profesyonel kozmetik ürünleri.</p>
                 <div class="d-flex gap-3">
                     <a href="#urunler" class="btn btn-primary btn-lg px-5 rounded-pill fw-bold shadow">Hemen Keşfet</a>
-                    <a href="#" class="btn btn-outline-light btn-lg px-4 rounded-pill">Koleksiyonlar</a>
                 </div>
             </div>
         </div>
-        <div class="position-absolute rounded-circle bg-primary opacity-10"
-             style="width: 500px; height: 500px; top: -100px; right: -100px;"></div>
     </div>
 
     <div class="row g-4" id="urunler">
         @* --- SOL FİLTRE PANELİ --- *@
         <div class="col-lg-3">
             <div class="card border-0 shadow-sm rounded-4 p-3 sticky-top" style="top: 100px;">
-                <h6 class="fw-bold mb-3 d-flex align-items-center">
+                <h6 class="fw-bold mb-3 d-flex align-items-center text-uppercase small ls-1">
                     <i class="fas fa-bars-staggered me-2 text-primary"></i>Kategoriler
                 </h6>
                 <div class="nav flex-column nav-pills custom-pills">
@@ -41,7 +38,6 @@
                        class="nav-link mb-2 rounded-pill text-start @(ViewBag.ActiveCategory == null ? "active" : "text-dark")">
                         <i class="fas fa-border-all me-2"></i>Tümü
                     </a>
-
                     @if (ViewBag.Categories != null)
                     {
                         foreach (var cat in (IEnumerable<UrunSatisPortali.Models.Category>)ViewBag.Categories)
@@ -56,7 +52,7 @@
             </div>
         </div>
 
-        @* --- ÜRÜN VİTRİNİ --- *@
+        @* --- ANA ÜRÜN VİTRİNİ --- *@
         <div class="col-lg-9">
             <div class="row g-4">
                 @foreach (var item in Model)
@@ -65,48 +61,66 @@
                         <div class="card h-100 border-0 shadow-sm rounded-4 product-card overflow-hidden bg-white">
                             <div class="position-relative">
                                 <img src="@item.Image" class="card-img-top p-4 rounded-5" alt="@item.Name"
-                                     style="height: 280px; object-fit: contain; transition: 0.5s;">
-
-                                <div class="badge-overlay position-absolute top-0 end-0 m-3">
-                                    <span class="badge bg-white text-dark shadow-sm px-3 py-2 rounded-pill fw-bold">Yeni</span>
-                                </div>
-
-                                @* FAVORİ BUTONU (Dinamik Kalp Kontrolü) *@
+                                     style="height: 280px; object-fit: contain;">
                                 <div class="position-absolute top-0 start-0 m-3">
                                     <a asp-controller="Wishlist" asp-action="AddToWishlist" asp-route-id="@item.Id"
-                                       class="btn btn-white shadow-sm rounded-circle p-2 wishlist-btn"
-                                       style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: white;">
+                                       class="btn btn-white shadow-sm rounded-circle p-2 wishlist-btn" style="background:white; border:none;">
                                         @if (wishlistIds.Contains(item.Id))
                                         {
-                                            <i class="fas fa-heart text-danger"></i> @* Dolu Kalp *@
+                                            <i class="fas fa-heart text-danger"></i>
                                         }
                                         else
                                         {
-                                            <i class="far fa-heart text-danger"></i> @* Boş Kalp *@
+                                            <i class="far fa-heart text-danger"></i>
                                         }
                                     </a>
                                 </div>
                             </div>
-
                             <div class="card-body p-4 text-center">
-                                <p class="text-muted small fw-bold mb-1 text-uppercase ls-1">@item.Brand?.Name</p>
-                                <h5 class="fw-bold mb-3 text-dark">@item.Name</h5>
-                                <div class="d-flex align-items-center justify-content-center mb-4">
+                                <p class="text-muted small fw-bold mb-1">@item.Brand?.Name</p>
+                                <h5 class="fw-bold mb-3 text-dark text-truncate">@item.Name</h5>
+                                <div class="mb-3">
                                     <span class="h4 fw-extra-bold text-primary mb-0">@item.Price.ToString("C2")</span>
                                 </div>
+
                                 <div class="d-grid gap-2">
                                     <a asp-controller="Cart" asp-action="AddToCart" asp-route-id="@item.Id"
                                        class="btn btn-primary rounded-pill py-2 fw-bold shadow-sm">
-                                        <i class="fas fa-plus me-2"></i>Sepete Ekle
+                                        <i class="fas fa-shopping-basket me-2"></i>Sepete Ekle
                                     </a>
+                                    @* GERİ GELEN İNCELE BUTONU *@
                                     <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id"
-                                       class="btn btn-light rounded-pill py-2 text-muted small border-0">Detayları İncele</a>
+                                       class="btn btn-light rounded-pill py-2 text-muted fw-bold border-0">
+                                        Detayları İncele
+                                    </a>
                                 </div>
                             </div>
                         </div>
                     </div>
                 }
             </div>
+
+            @* --- İLGİNİZİ ÇEKEBİLECEK ÜRÜNLER BÖLÜMÜ --- *@
+            @if (ViewBag.SuggestedProducts != null)
+            {
+                <div class="mt-5 pt-5 border-top">
+                    <h4 class="fw-bold text-dark mb-4"><i class="fas fa-magic text-primary me-2"></i>İlginizi Çekebilecek <span class="text-primary">Diğer Ürünler</span></h4>
+                    <div class="row g-4">
+                        @foreach (var sug in (IEnumerable<UrunSatisPortali.Models.Product>)ViewBag.SuggestedProducts)
+                        {
+                            <div class="col-md-3">
+                                <div class="card h-100 border-0 shadow-sm rounded-4 text-center p-3 suggestion-card">
+                                    <a asp-action="Details" asp-controller="Product" asp-route-id="@sug.Id" class="text-decoration-none">
+                                        <img src="@sug.Image" class="img-fluid mb-2" style="height: 120px; object-fit: contain;">
+                                        <h6 class="fw-bold text-dark small text-truncate">@sug.Name</h6>
+                                        <span class="text-primary fw-bold small">@sug.Price.ToString("C2")</span>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>
@@ -121,31 +135,22 @@
     }
 
     .product-card {
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transition: all 0.3s ease;
     }
 
         .product-card:hover {
-            transform: translateY(-12px);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1) !important;
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
         }
 
-            .product-card:hover img {
-                transform: scale(1.08);
-            }
-
-    .custom-pills .nav-link {
+    .suggestion-card {
         transition: 0.3s;
-        border: 1px solid transparent;
+        border: 1px solid transparent !important;
     }
 
-        .custom-pills .nav-link:hover:not(.active) {
-            background-color: #f8fafc;
-            border-color: #e2e8f0;
-        }
-
-        .custom-pills .nav-link.active {
-            background-color: #3b82f6 !important;
-            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+        .suggestion-card:hover {
+            border-color: #3b82f6 !important;
+            transform: scale(1.05);
         }
 
     .text-gradient {
@@ -154,11 +159,8 @@
         -webkit-text-fill-color: transparent;
     }
 
-    .wishlist-btn {
-        transition: 0.3s;
+    .btn-light:hover {
+        background-color: #e2e8f0 !important;
+        color: #1e293b !important;
     }
-
-        .wishlist-btn:hover {
-            transform: scale(1.1);
-        }
 </style>

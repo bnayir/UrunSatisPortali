@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity; // Bunu eklediğinden emin ol
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using UrunSatisPortali.Data;
 using UrunSatisPortali.Models;
+using System.Linq;
 
 namespace UrunSatisPortali.Controllers
 {
@@ -9,12 +10,12 @@ namespace UrunSatisPortali.Controllers
     {
         private readonly IRepository<Product> _productRepo;
         private readonly IRepository<Comment> _commentRepo;
-        private readonly UserManager<IdentityUser> _userManager; // <IdentityUser> eklendi
+        private readonly UserManager<IdentityUser> _userManager;
 
         public ProductController(
             IRepository<Product> productRepo,
             IRepository<Comment> commentRepo,
-            UserManager<IdentityUser> userManager) // Buraya da eklendi
+            UserManager<IdentityUser> userManager)
         {
             _productRepo = productRepo;
             _commentRepo = commentRepo;
@@ -23,23 +24,26 @@ namespace UrunSatisPortali.Controllers
 
         public IActionResult Details(int id)
         {
-            // "Comments" tablosunu Include (dahil) ediyoruz
-            var product = _productRepo.GetAll("Category,Brand,Comments").FirstOrDefault(x => x.Id == id);
-
+            // Mevcut ürünü çekiyoruz
+            var product = _productRepo.GetAll("Category,Brand,Comments.User").FirstOrDefault(x => x.Id == id);
             if (product == null) return NotFound();
 
-            ViewBag.RelatedProducts = _productRepo.GetAll("Category,Brand")
-                .Where(x => x.CategoryId == product.CategoryId && x.Id != id)
-                .Take(4)
-                .ToList();
+            // ÖNEMLİ: Details sayfasında görünecek öneri ürünlerini burada hazırlıyoruz
+            ViewBag.SuggestedProducts = _productRepo.GetAll("Category,Brand")
+                                                    .Where(x => x.Id != id) // Bakılan ürünü listeden çıkar
+                                                    .OrderBy(x => Guid.NewGuid())
+                                                    .Take(4)
+                                                    .ToList();
 
             return View(product);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken] // Güvenlik için eklendi
         public IActionResult AddComment(int ProductId, string Content)
         {
-            // Kullanıcı ID'sini almak için doğru kullanım
+            if (!User.Identity.IsAuthenticated) return Unauthorized();
+
             var userId = _userManager.GetUserId(User);
 
             if (!string.IsNullOrEmpty(Content) && userId != null)
@@ -51,8 +55,10 @@ namespace UrunSatisPortali.Controllers
                     UserId = userId,
                     CreatedDate = DateTime.Now
                 };
-                _commentRepo.Add(comment);
+
+                _commentRepo.Add(comment); // Kayıt işlemi
             }
+
             return RedirectToAction("Details", new { id = ProductId });
         }
     }

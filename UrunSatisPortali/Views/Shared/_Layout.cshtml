@@ -28,10 +28,10 @@
             color: #334155;
         }
 
-        /* Navbar Modernizasyonu */
         .navbar {
             background: rgba(255, 255, 255, 0.9) !important;
             backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
 
         .nav-link {
@@ -45,7 +45,52 @@
                 transform: translateY(-1px);
             }
 
-        /* Dinamik Sayacı (Badge) Stili */
+        .dropdown-menu {
+            border-radius: 15px;
+            border: none;
+            padding: 10px;
+            min-width: 240px;
+        }
+
+        .dropdown-item {
+            border-radius: 10px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+            .dropdown-item:hover {
+                background-color: #eff6ff;
+                color: var(--primary-color);
+                padding-left: 20px;
+            }
+
+        .dropdown-header {
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+
+        .animate.slideIn {
+            animation-duration: 0.3s;
+            animation-fill-mode: both;
+            animation-name: slideIn;
+        }
+
+        @@keyframes slideIn {
+            0% {
+                transform: translateY(1rem);
+                opacity: 0;
+            }
+
+            100% {
+                transform: translateY(0rem);
+                opacity: 1;
+            }
+        }
+
         .cart-badge {
             font-size: 0.7rem;
             min-width: 18px;
@@ -54,20 +99,14 @@
             align-items: center;
             justify-content: center;
             border: 2px solid #fff;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .nav-link:hover .cart-badge {
-            transform: scale(1.2) translate(20%, -20%);
         }
 
         .btn-primary {
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             border: none;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+            border-radius: 50px;
         }
 
-        /* Sayfa geçiş animasyonu */
         main {
             animation: fadeIn 0.5s ease-in;
         }
@@ -104,20 +143,35 @@
                                 <i class="fas fa-home me-1 opacity-50"></i> Anasayfa
                             </a>
                         </li>
+
+                        @* --- ALT MENÜLÜ KATEGORİLER (ID'LER GÜNCELLENDİ) --- *@
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark" href="#" id="catDrop" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-th-large me-1 opacity-50"></i> Kategoriler
+                            </a>
+                            <ul class="dropdown-menu shadow-lg border-0 mt-2 animate slideIn" aria-labelledby="catDrop">
+                                <li class="dropdown-header fw-bold text-uppercase">Makyaj</li>
+                                @* DİKKAT: asp-route-categoryId değerlerini SQL tablonuzdaki gerçek Id'ler ile değiştirin! *@
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Index" asp-route-categoryId="1"><i class="fas fa-chevron-right me-2 small text-primary"></i>Dudak Makyajı</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Index" asp-route-categoryId="15"><i class="fas fa-chevron-right me-2 small text-primary"></i>Göz Makyajı</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Index" asp-route-categoryId="3"><i class="fas fa-chevron-right me-2 small text-primary"></i>Ten Makyajı</a></li>
+
+                                <li><hr class="dropdown-divider"></li>
+
+                                <li class="dropdown-header fw-bold text-uppercase">Cilt Bakımı</li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Index" asp-route-categoryId="4"><i class="fas fa-leaf me-2 small text-success"></i>Serumlar</a></li>
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Index" asp-route-categoryId="5"><i class="fas fa-sun me-2 small text-warning"></i>Güneş Kremleri</a></li>
+
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item fw-bold text-center text-primary" asp-area="" asp-controller="Home" asp-action="Index">Tüm Kategoriler</a></li>
+                            </ul>
+                        </li>
+
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Contact" asp-action="Index">
                                 <i class="fas fa-envelope me-1 opacity-50"></i> İletişim
                             </a>
                         </li>
-
-                        @if (SignInManager.IsSignedIn(User))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Order" asp-action="Index">
-                                    <i class="fas fa-box me-1 opacity-50"></i> Siparişlerim
-                                </a>
-                            </li>
-                        }
 
                         @if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
                         {
@@ -129,38 +183,37 @@
                         }
                     </ul>
 
-                    <ul class="navbar-nav align-items-center text-center text-lg-start">
-                        @* --- FAVORİLER --- *@
+                    <ul class="navbar-nav align-items-center">
                         <li class="nav-item me-lg-2">
-                            <a class="nav-link d-flex align-items-center justify-content-center" asp-controller="Wishlist" asp-action="Index">
+                            <a class="nav-link d-flex align-items-center" asp-area="" asp-controller="Wishlist" asp-action="Index">
                                 <i class="fas fa-heart text-danger me-1"></i>
-                                <span class="d-none d-xl-inline small fw-bold">Favorilerim</span>
+                                <span class="d-none d-xl-inline small fw-bold">Favoriler</span>
                             </a>
                         </li>
 
-                        @* --- SEPET --- *@
                         <li class="nav-item me-lg-3">
-                            <a class="nav-link position-relative d-flex align-items-center justify-content-center bg-light rounded-pill px-3"
-                               asp-controller="Cart" asp-action="Index" style="height: 40px;">
+                            <a class="nav-link position-relative d-flex align-items-center bg-light rounded-pill px-3"
+                               asp-area="" asp-controller="Cart" asp-action="Index" style="height: 40px;">
                                 <i class="fas fa-shopping-cart text-primary"></i>
                                 <span class="cart-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm">
                                     @(Context.Session.GetString("CartCount") ?? "0")
                                 </span>
-                                <span class="ms-2 d-none d-xl-inline small fw-bold">Sepetim</span>
+                                <span class="ms-2 d-none d-xl-inline small fw-bold text-dark">Sepetim</span>
                             </a>
                         </li>
 
                         @if (SignInManager.IsSignedIn(User))
                         {
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle bg-white border rounded-pill px-3 d-flex align-items-center shadow-sm justify-content-center"
+                                <a class="nav-link dropdown-toggle bg-white border rounded-pill px-3 d-flex align-items-center shadow-sm"
                                    href="#" id="userDrop" data-bs-toggle="dropdown" style="height: 40px;">
                                     <img src="https://ui-avatars.com/api/?name=@User.Identity?.Name&background=3b82f6&color=fff"
                                          class="rounded-circle me-2" width="24" height="24">
-                                    <span class="small fw-bold">@User.Identity?.Name</span>
+                                    <span class="small fw-bold text-dark">@User.Identity?.Name</span>
                                 </a>
-                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2 animate slideIn">
                                     <li><a class="dropdown-item py-2" asp-area="Identity" asp-page="/Account/Manage/Index"><i class="fas fa-user-circle me-2 opacity-50"></i>Profilim</a></li>
+                                    <li><a class="dropdown-item py-2" asp-area="" asp-controller="Order" asp-action="Index"><i class="fas fa-box me-2 opacity-50"></i>Siparişlerim</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
@@ -176,7 +229,7 @@
                                 <a class="nav-link text-dark fw-bold" asp-area="Identity" asp-page="/Account/Login">Giriş</a>
                             </li>
                             <li class="nav-item">
-                                <a class="btn btn-primary rounded-pill px-4 fw-bold" asp-area="Identity" asp-page="/Account/Register">Kayıt Ol</a>
+                                <a class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" asp-area="Identity" asp-page="/Account/Register">Kayıt Ol</a>
                             </li>
                         }
                     </ul>
@@ -190,23 +243,23 @@
     </main>
 
     <footer class="bg-white border-top py-5 mt-auto">
-        <div class="container text-center text-md-start">
+        <div class="container">
             <div class="row align-items-center">
-                <div class="col-md-4 mb-3 mb-md-0 text-center text-md-start">
+                <div class="col-md-4 mb-3 mb-md-0">
                     <h5 class="fw-bold text-primary mb-0"><i class="fas fa-magic me-2"></i>KOZMETİK PORTALI</h5>
                     <p class="small text-muted mt-2">Güzelliğin teknoloji ile buluştuğu nokta.</p>
                 </div>
-                <div class="col-md-4 mb-3 mb-md-0 text-center text-muted small">
+                <div class="col-md-4 text-center text-muted small">
                     &copy; 2025 - Tüm Hakları Saklıdır.<br>
-                    <span class="text-primary fw-bold">Kozmetik Dünyası Geliştirici Ekibi</span>
+                    <span class="text-primary fw-bold">Antalya Kozmetik Geliştirici Ekibi</span>
                 </div>
-                <div class="col-md-4 text-center text-md-end">
+                <div class="col-md-4 text-md-end text-center">
                     <div class="social-links mb-3">
                         <a href="#" class="text-muted me-3 fs-5"><i class="fab fa-instagram"></i></a>
                         <a href="#" class="text-muted me-3 fs-5"><i class="fab fa-facebook"></i></a>
                         <a href="#" class="text-muted fs-5"><i class="fab fa-twitter"></i></a>
                     </div>
-                    <span class="badge bg-light text-muted border px-3 py-2 rounded-pill">Sürüm 1.2.5 - Final</span>
+                    <span class="badge bg-light text-muted border px-3 py-2 rounded-pill small">v1.2.5 Final</span>
                 </div>
             </div>
         </div>
