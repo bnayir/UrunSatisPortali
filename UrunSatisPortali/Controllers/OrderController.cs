@@ -105,4 +105,29 @@ public class OrderController : Controller
 
         return View(order);
     }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult UpdateStatus(int id, string status)
+    {
+        // Veriyi çekiyoruz
+        var order = _orderRepo.GetById(id);
+        if (order == null) return NotFound();
+
+        // Durumu güncelliyoruz
+        order.Status = status;
+
+        // EĞER REPOSITORY KAYDETMİYORSA, BURADA ZORLA KAYDETTİRELİM:
+        try
+        {
+            _orderRepo.Update(order);
+            // Eğer repository içindeki SaveChanges çalışmıyorsa buraya bir log/hata düşer.
+        }
+        catch (Exception ex)
+        {
+            // Hata varsa burada durdurup bakabilirsin
+            return BadRequest(ex.Message);
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
 }

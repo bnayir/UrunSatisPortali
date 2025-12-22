@@ -70,10 +70,33 @@
                                 <span class="fw-extra-bold text-primary fs-5">@item.TotalPrice.ToString("C2")</span>
                             </td>
                             <td class="p-4 text-end">
-                                <div class="d-flex justify-content-end align-items-center gap-2">
-                                    <span class="badge bg-soft-success text-success rounded-pill px-3 py-2 small fw-bold">
-                                        <i class="fas fa-check-circle me-1"></i> Tamamlandı
-                                    </span>
+                                <div class="d-flex justify-content-end align-items-center gap-3">
+                                    @* --- DURUM İKONU VE METNİ --- *@
+                                    @if (item.Status == "Teslim Edildi")
+                                    {
+                                        <span class="badge bg-success rounded-pill px-3 py-2 fw-bold">
+                                            <i class="fas fa-check-circle me-1"></i> @item.Status
+                                        </span>
+                                    }
+                                    else if (item.Status == "Kargoya Verildi")
+                                    {
+                                        <span class="badge bg-info text-white rounded-pill px-3 py-2 fw-bold">
+                                            <i class="fas fa-truck me-1"></i> @item.Status
+                                        </span>
+                                    }
+                                    else if (item.Status == "Hazırlanıyor")
+                                    {
+                                        <span class="badge bg-primary rounded-pill px-3 py-2 fw-bold">
+                                            <i class="fas fa-box me-1"></i> @item.Status
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fw-bold">
+                                            <i class="fas fa-clock me-1"></i> @(item.Status ?? "Sipariş Alındı")
+                                        </span>
+                                    }
+
                                     <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-white border rounded-pill px-3 shadow-xs hover-primary">
                                         <i class="fas fa-eye me-1"></i> İncele
                                     </a>
@@ -92,9 +115,25 @@
         font-weight: 800;
     }
 
+    /* Yumuşak Renkli Rozetler */
     .bg-soft-success {
         background-color: #ecfdf5;
-        color: #10b981;
+        color: #10b981 !important;
+    }
+
+    .bg-soft-info {
+        background-color: #e0f2fe;
+        color: #0ea5e9 !important;
+    }
+
+    .bg-soft-warning {
+        background-color: #fffbeb;
+        color: #f59e0b !important;
+    }
+
+    .bg-soft-primary {
+        background-color: #eff6ff;
+        color: #3b82f6 !important;
     }
 
     .x-small {
@@ -119,13 +158,9 @@
         letter-spacing: 0.05em;
     }
 
-    .table tbody tr {
-        transition: background-color 0.2s;
+    .table tbody tr:hover {
+        background-color: #f8fafc;
     }
-
-        .table tbody tr:hover {
-            background-color: #f8fafc;
-        }
 
     .shadow-xs {
         box-shadow: 0 1px 2px rgba(0,0,0,0.05);

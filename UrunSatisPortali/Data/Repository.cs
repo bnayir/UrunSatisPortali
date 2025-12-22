@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using UrunSatisPortali.Data; // Kendi namespace'ini kontrol et
+using System.Collections.Generic;
+using System;
+using System.Linq;
 
 namespace UrunSatisPortali.Data
 {
@@ -18,21 +20,19 @@ namespace UrunSatisPortali.Data
         public void Add(T entity)
         {
             dbSet.Add(entity);
-            _db.SaveChanges();
+            _db.SaveChanges(); // Kayıt işlemini garantiler
         }
 
         public void Delete(T entity)
         {
             dbSet.Remove(entity);
-            _db.SaveChanges();
+            _db.SaveChanges(); // Silme işlemini garantiler
         }
 
-        // --- GÜNCELLENEN KISIM BURASI ---
         public IEnumerable<T> GetAll(string? includeProps = null)
         {
             IQueryable<T> query = dbSet;
 
-            // Eğer "Category" gibi bir istek geldiyse, onu sorguya dahil et
             if (!string.IsNullOrEmpty(includeProps))
             {
                 foreach (var includeProp in includeProps.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
@@ -43,17 +43,18 @@ namespace UrunSatisPortali.Data
 
             return query.ToList();
         }
-        // --------------------------------
 
         public T GetById(int id)
         {
             return dbSet.Find(id);
         }
 
+        // --- DÜZELTİLEN GÜNCELLEME METODU ---
         public void Update(T entity)
         {
+            // Değişken isimleri sınıfın üst kısmındaki tanımlarla eşitlendi
             dbSet.Update(entity);
-            _db.SaveChanges();
+            _db.SaveChanges(); // Veritabanına fiziksel kaydı yapan kritik satır
         }
     }
 }

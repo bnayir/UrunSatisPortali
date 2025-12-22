@@ -6,33 +6,75 @@
 
 <div class="container py-5">
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div class="card-header bg-primary text-white p-4">
-            <h4 class="mb-0"><i class="fas fa-file-invoice me-2"></i>Sipariş Detayı: #ORD-@Model.Id</h4>
+        @* --- ÜST BAŞLIK VE DURUM ROZETİ --- *@
+        <div class="card-header bg-primary text-white p-4 d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="fas fa-file-invoice me-2"></i>Sipariş Detayı: #ORD-@Model.Id.ToString().PadLeft(5, '0')</h4>
+
+            @* Dinamik Durum Göstergesi *@
+            <span class="badge @(Model.Status == "Teslim Edildi" ? "bg-success" : (Model.Status == "Kargoya Verildi" ? "bg-info text-dark" : "bg-warning text-dark")) rounded-pill px-4 py-2 shadow-sm border border-white">
+                <i class="fas @(Model.Status == "Teslim Edildi" ? "fa-check-circle" : (Model.Status == "Kargoya Verildi" ? "fa-truck" : "fa-clock")) me-1"></i>
+                @Model.Status
+            </span>
         </div>
+
         <div class="card-body p-4 bg-white">
             <div class="row g-4">
+                @* --- MÜŞTERİ BİLGİLERİ --- *@
                 <div class="col-md-6">
-                    <h5 class="fw-bold border-bottom pb-2">Müşteri Bilgileri</h5>
-                    <p class="mb-1"><strong>Ad Soyad:</strong> @Model.FirstName @Model.LastName</p>
-                    <p class="mb-1"><strong>Telefon:</strong> @Model.Phone</p>
-                    <p class="mb-0"><strong>Tarih:</strong> @Model.OrderDate.ToString("dd.MM.yyyy HH:mm")</p>
+                    <div class="p-3 bg-light rounded-4 h-100">
+                        <h5 class="fw-bold border-bottom pb-2 mb-3 text-dark"><i class="fas fa-user me-2 text-primary"></i>Müşteri Bilgileri</h5>
+                        <p class="mb-2"><strong>Ad Soyad:</strong> <span class="text-muted">@Model.FirstName @Model.LastName</span></p>
+                        <p class="mb-2"><strong>Telefon:</strong> <span class="text-muted">@Model.Phone</span></p>
+                        <p class="mb-0"><strong>Sipariş Tarihi:</strong> <span class="text-muted">@Model.OrderDate.ToString("dd.MM.yyyy HH:mm")</span></p>
+                    </div>
                 </div>
+
+                @* --- TESLİMAT BİLGİLERİ --- *@
                 <div class="col-md-6">
-                    <h5 class="fw-bold border-bottom pb-2">Teslimat Adresi</h5>
-                    <p class="mb-1"><strong>Şehir:</strong> @Model.City</p>
-                    <p class="mb-0"><strong>Adres:</strong> @Model.Address</p>
+                    <div class="p-3 bg-light rounded-4 h-100">
+                        <h5 class="fw-bold border-bottom pb-2 mb-3 text-dark"><i class="fas fa-map-marker-alt me-2 text-primary"></i>Teslimat Adresi</h5>
+                        <p class="mb-2"><strong>Şehir:</strong> <span class="text-muted">@Model.City</span></p>
+                        <p class="mb-0"><strong>Tam Adres:</strong> <br><span class="text-muted">@Model.Address</span></p>
+                    </div>
                 </div>
             </div>
 
             <hr class="my-4 opacity-25">
 
-            <div class="d-flex justify-content-between align-items-center">
-                <h4 class="fw-extra-bold m-0">Toplam Ödenen:</h4>
-                <h3 class="text-primary fw-extra-bold m-0">@Model.TotalPrice.ToString("C2")</h3>
+            @* --- ÖDEME ÖZETİ --- *@
+            <div class="bg-primary bg-opacity-10 p-4 rounded-4 d-flex justify-content-between align-items-center">
+                <h4 class="fw-bold m-0 text-dark">Toplam Ödenen Tutar:</h4>
+                <div class="text-end">
+                    <h3 class="text-primary fw-extra-bold m-0">@Model.TotalPrice.ToString("C2")</h3>
+                    <small class="text-muted small">KDV ve Kargo Dahil</small>
+                </div>
             </div>
         </div>
-        <div class="card-footer bg-light p-3 text-end">
-            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">Siparişlerime Dön</a>
+
+        <div class="card-footer bg-light p-4 text-center">
+            <a asp-action="Index" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm transition-up">
+                <i class="fas fa-chevron-left me-2"></i>Siparişlerim Sayfasına Dön
+            </a>
         </div>
     </div>
 </div>
+
+<style>
+    .fw-extra-bold {
+        font-weight: 800;
+    }
+
+    .transition-up {
+        transition: all 0.3s;
+    }
+
+        .transition-up:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+        }
+
+    .badge {
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+    }
+</style>
