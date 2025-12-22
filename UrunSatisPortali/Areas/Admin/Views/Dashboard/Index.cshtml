@@ -5,7 +5,6 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Yönetim Paneli";
 
-    // Güvenlik: Null kontrolleri
     var totalSales = ViewBag.TotalSales ?? 0.0;
     var orderCount = ViewBag.OrderCount ?? 0;
     var userCount = ViewBag.UserCount ?? 0;
@@ -13,148 +12,72 @@
 }
 
 <div class="container-fluid pt-4 px-4">
-    @* --- ÜST ÖZET KARTLARI --- *@
     <div class="row g-4 mb-4">
         <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-4 p-4 d-flex flex-row align-items-center justify-content-between bg-white card-hover">
-                <div class="icon-circle bg-primary-soft text-primary">
+            <div class="card border-0 shadow-sm rounded-4 p-4 d-flex flex-row align-items-center justify-content-between bg-white">
+                <div class="icon-circle bg-light text-primary" style="width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #f0f3ff;">
                     <i class="fa fa-chart-line fa-2x"></i>
                 </div>
                 <div class="text-end">
                     <p class="mb-1 text-muted small fw-bold text-uppercase">Toplam Satış</p>
-                    <h4 class="mb-0 fw-extra-bold text-dark">@totalSales.ToString("C2")</h4>
+                    @* ID'ler JavaScript tarafından kontrol edilecek *@
+                    <h4 id="totalSalesText" class="mb-0 fw-bold">@totalSales.ToString("C2")</h4>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-4 p-4 d-flex flex-row align-items-center justify-content-between bg-white card-hover">
-                <div class="icon-circle bg-success-soft text-success">
+            <div class="card border-0 shadow-sm rounded-4 p-4 d-flex flex-row align-items-center justify-content-between bg-white">
+                <div class="icon-circle bg-light text-success" style="width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #f0fff4;">
                     <i class="fa fa-shopping-basket fa-2x"></i>
                 </div>
                 <div class="text-end">
                     <p class="mb-1 text-muted small fw-bold text-uppercase">Siparişler</p>
-                    <h4 class="mb-0 fw-extra-bold text-dark">@orderCount</h4>
+                    <h4 id="orderCountText" class="mb-0 fw-bold">@orderCount</h4>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-4 p-4 d-flex flex-row align-items-center justify-content-between bg-white card-hover">
-                <div class="icon-circle bg-info-soft text-info">
+            <div class="card border-0 shadow-sm rounded-4 p-4 d-flex flex-row align-items-center justify-content-between bg-white">
+                <div class="icon-circle bg-light text-info" style="width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #e6f7ff;">
                     <i class="fa fa-users fa-2x"></i>
                 </div>
                 <div class="text-end">
                     <p class="mb-1 text-muted small fw-bold text-uppercase">Müşteriler</p>
-                    <h4 class="mb-0 fw-extra-bold text-dark">@userCount</h4>
+                    <h4 class="mb-0 fw-bold">@userCount</h4>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-4 p-4 d-flex flex-row align-items-center justify-content-between bg-white card-hover">
-                <div class="icon-circle bg-warning-soft text-warning">
+            <div class="card border-0 shadow-sm rounded-4 p-4 d-flex flex-row align-items-center justify-content-between bg-white">
+                <div class="icon-circle bg-light text-warning" style="width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #fffaf0;">
                     <i class="fa fa-envelope fa-2x"></i>
                 </div>
                 <div class="text-end">
                     <p class="mb-1 text-muted small fw-bold text-uppercase">Yeni Mesaj</p>
-                    <h4 class="mb-0 fw-extra-bold text-warning">@messageCount</h4>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-4 mb-4">
-        @* --- GRAFİK ALANI --- *@
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                <h6 class="mb-4 fw-bold text-dark"><i class="fas fa-chart-pie me-2 text-primary"></i>Kategori Bazlı Ürün Dağılımı</h6>
-                <div class="chart-area" style="height: 300px;">
-                    <canvas id="categoryChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        @* --- HIZLI ANALİZ: EN POPÜLER ÜRÜNLER (Düzeltildi) --- *@
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                <h6 class="mb-4 fw-bold text-dark"><i class="fas fa-fire me-2 text-danger"></i>En Popüler Ürünler</h6>
-                <div class="list-group list-group-flush">
-                    @if (ViewBag.TopProducts != null)
-                    {
-                        @* ÖNEMLİ: InvalidCastException hatasını çözmek için dynamic kullanıyoruz *@
-                        @foreach (var item in (dynamic)ViewBag.TopProducts)
-                        {
-                            <div class="list-group-item bg-transparent border-0 px-0 mb-3 d-flex align-items-center">
-                                <div class="rounded-3 bg-light p-2 me-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
-                                    <img src="@item.Image" class="img-fluid rounded" style="max-height: 40px;" onerror="this.src='/images/no-image.png'">
-                                </div>
-                                <div class="flex-grow-1 text-truncate">
-                                    <h6 class="mb-0 small fw-bold text-dark text-truncate">@item.Name</h6>
-                                    <span class="text-muted" style="font-size: 0.7rem;">@item.SalesCount Satış</span>
-                                </div>
-                                <span class="badge bg-primary-soft text-primary rounded-pill small ms-2">@item.Price.ToString("C0")</span>
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                        <p class="text-muted small text-center py-4">Satış verisi hazırlanıyor...</p>
-                    }
+                    <h4 class="mb-0 fw-bold">@messageCount</h4>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="row g-4">
-        @* --- SON GELEN MESAJLAR --- *@
-        <div class="col-lg-7">
+        <div class="col-lg-8">
             <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-envelope-open-text me-2 text-primary"></i>Son Mesajlar</h6>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0 text-nowrap">
-                        <tbody>
-                            @if (ViewBag.RecentMessages != null)
-                            {
-                                foreach (var msg in (IEnumerable<Message>)ViewBag.RecentMessages)
-                                {
-                                    <tr>
-                                        <td style="width: 45px;">
-                                            <div class="avatar-letter bg-primary text-white rounded-circle">@msg.Name.Substring(0, 1).ToUpper()</div>
-                                        </td>
-                                        <td>
-                                            <div class="fw-bold text-dark small">@msg.Name</div>
-                                            <div class="text-muted text-truncate small" style="max-width: 180px;">@msg.Subject</div>
-                                        </td>
-                                        <td class="text-end small text-muted">@msg.CreatedDate.ToShortDateString()</td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
+                <h6 class="mb-4 fw-bold text-dark"><i class="fas fa-chart-pie me-2 text-primary"></i>Kategori Bazlı Ürün Dağılımı</h6>
+                <div style="height: 300px; position: relative;">
+                    <canvas id="categoryChart"></canvas>
                 </div>
             </div>
         </div>
-
-        @* --- DİNAMİK STOK DURUMU --- *@
-        <div class="col-lg-5">
+        <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 text-center">
-                <h6 class="mb-4 fw-bold text-dark text-start"><i class="fas fa-server me-2 text-primary"></i>Stok Doluluk Oranı</h6>
-                @{
-                    // Gerçek stok takibi
-                    var currentStock = Model?.Sum(x => x.Stock) ?? 0;
-                    var maxCapacity = 500; // Örnek kapasite
-                    var stockPercent = currentStock > 0 ? (currentStock * 100 / maxCapacity) : 0;
-                    if (stockPercent > 100) stockPercent = 100;
-                }
-                <div class="py-3">
-                    <div class="h1 fw-extra-bold text-primary mb-1">%@stockPercent</div>
-                    <p class="text-muted small mb-3">Toplam @currentStock adet ürün stokta</p>
-                    <div class="progress rounded-pill shadow-sm" style="height: 12px;">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" style="width: @stockPercent%"></div>
+                <h6 class="mb-4 fw-bold text-dark text-start"><i class="fas fa-server me-2 text-primary"></i>Sistem Durumu</h6>
+                <div class="py-4">
+                    <div class="h1 fw-bold text-primary mb-1">OK</div>
+                    <p class="text-muted small">Sistem SignalR ile izleniyor.</p>
+                    <div class="progress rounded-pill" style="height: 10px;">
+                        <div class="progress-bar bg-primary" style="width: 100%"></div>
                     </div>
-                </div>
-                <div class="mt-4 p-2 bg-light rounded-pill small fw-bold text-success border border-success-subtle">
-                    <i class="fas fa-check-circle me-1"></i> Tüm sistemler aktif
                 </div>
             </div>
         </div>
@@ -163,74 +86,54 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    @* Sürüm 6.0.1 kullanıyoruz, 8.0 yüklemiyoruz *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+
     <script>
-        var ctx = document.getElementById("categoryChart");
-        var myChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: @Html.Raw(Json.Serialize(ViewBag.CategoryLabels ?? new string[] { "Veri Bekleniyor" })),
-                datasets: [{
-                    data: @Html.Raw(Json.Serialize(ViewBag.CategoryCounts ?? new int[] { 1 })),
-                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
-                    hoverOffset: 10,
-                    borderWidth: 2
-                }],
-            },
-            options: {
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 25 } } },
-                cutout: '75%'
+        // Sayfa tamamen yüklendiğinde grafiği ve tüneli başlat
+        window.onload = function() {
+
+            // --- 1. SIGNALR BAĞLANTISI ---
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/dashboardHub")
+                .build();
+
+            connection.on("ReceiveOrderUpdate", function (newOrderCount, newTotalSales) {
+                // Sayfayı yenilemeden rakamları güncelle
+                const orderEl = document.getElementById("orderCountText");
+                const salesEl = document.getElementById("totalSalesText");
+
+                if (orderEl) orderEl.innerText = newOrderCount;
+                if (salesEl) salesEl.innerText = newTotalSales;
+
+                console.log("Anlık Güncelleme Başarılı: " + newOrderCount);
+            });
+
+            connection.start()
+                .then(() => console.log("SignalR Bağlantısı Kuruldu."))
+                .catch(err => console.error("SignalR Hatası: " + err.toString()));
+
+            // --- 2. GRAFİK ÇİZİMİ ---
+            const canvas = document.getElementById("categoryChart");
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: @Html.Raw(Json.Serialize(ViewBag.CategoryLabels ?? new string[] { "Yükleniyor" })),
+                        datasets: [{
+                            data: @Html.Raw(Json.Serialize(ViewBag.CategoryCounts ?? new int[] { 1 })),
+                            backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
             }
-        });
+        };
     </script>
 }
-
-<style>
-    .fw-extra-bold {
-        font-weight: 800;
-    }
-
-    .card-hover {
-        transition: transform 0.2s ease;
-        cursor: default;
-    }
-
-        .card-hover:hover {
-            transform: translateY(-3px);
-        }
-
-    .icon-circle {
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .bg-primary-soft {
-        background-color: #f0f3ff;
-    }
-
-    .bg-success-soft {
-        background-color: #f0fff4;
-    }
-
-    .bg-info-soft {
-        background-color: #e6f7ff;
-    }
-
-    .bg-warning-soft {
-        background-color: #fffaf0;
-    }
-
-    .avatar-letter {
-        width: 36px;
-        height: 36px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.85rem;
-        font-weight: bold;
-    }
-</style>

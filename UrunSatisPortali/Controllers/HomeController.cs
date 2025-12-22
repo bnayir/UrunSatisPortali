@@ -11,21 +11,30 @@ namespace UrunSatisPortali.Controllers
     {
         private readonly IRepository<Product> _productRepo;
         private readonly IRepository<Category> _categoryRepo;
-        private readonly IRepository<Newsletter> _newsletterRepo; // Yeni e-bülten servisi
+        private readonly IRepository<Newsletter> _newsletterRepo;
 
         public HomeController(IRepository<Product> productRepo, IRepository<Category> categoryRepo, IRepository<Newsletter> newsletterRepo)
         {
             _productRepo = productRepo;
             _categoryRepo = categoryRepo;
-            _newsletterRepo = newsletterRepo; // Dependency injection ile baðladýk
+            _newsletterRepo = newsletterRepo;
         }
 
-        public IActionResult Index(int? categoryId)
+        // --- TEK BÝR INDEX METODUNDA ARAMA VE KATEGORÝ BÝRLEÞTÝRÝLDÝ ---
+        public IActionResult Index(int? categoryId, string searchString)
         {
-            // 1. Ana Ürün Sorgusu
+            // 1. Ana Ürün Sorgusu (Ýliþkili tablolarla birlikte)
             var productsQuery = _productRepo.GetAll("Category,Brand");
 
-            // 2. Kategori ve Yan Menü Mantýðý
+            // 2. ARAMA MANTIÐI
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                productsQuery = productsQuery.Where(s => s.Name.Contains(searchString)
+                                          || s.Description.Contains(searchString));
+                ViewBag.SearchString = searchString;
+            }
+
+            // 3. KATEGORÝ FÝLTRELEME MANTIÐI
             if (categoryId.HasValue)
             {
                 var subCategories = _categoryRepo.GetAll()
@@ -36,7 +45,6 @@ namespace UrunSatisPortali.Controllers
                 {
                     var subCategoryIds = subCategories.Select(s => s.Id).ToList();
                     subCategoryIds.Add(categoryId.Value);
-
                     productsQuery = productsQuery.Where(x => subCategoryIds.Contains(x.CategoryId));
                     ViewBag.Categories = subCategories;
                 }
@@ -53,18 +61,17 @@ namespace UrunSatisPortali.Controllers
 
             ViewBag.ActiveCategory = categoryId;
 
-            // 3. Ýlginizi Çekebilecek Ürünler (Rastgele 4 Ürün)
+            // 4. Ýlginizi Çekebilecek Ürünler (Rastgele 4 Ürün)
             ViewBag.SuggestedProducts = _productRepo.GetAll("Category,Brand")
-                                                    .OrderBy(x => Guid.NewGuid())
-                                                    .Take(4)
-                                                    .ToList();
+                                                     .OrderBy(x => Guid.NewGuid())
+                                                     .Take(4)
+                                                     .ToList();
 
-            // 4. Ürünleri Id'ye göre sýrala ve gönder
+            // 5. Sonuçlarý listele
             var products = productsQuery.OrderByDescending(x => x.Id).ToList();
             return View(products);
         }
 
-        // --- E-BÜLTEN ABONE OLMA METODU ---
         [HttpPost]
         public IActionResult Subscribe(string email)
         {
@@ -73,7 +80,6 @@ namespace UrunSatisPortali.Controllers
                 return Json(new { success = false, message = "Lütfen bir e-posta adresi giriniz!" });
             }
 
-            // Daha önce kayýt olmuþ mu kontrolü
             var isExist = _newsletterRepo.GetAll().Any(x => x.Email.ToLower() == email.ToLower());
             if (isExist)
             {
@@ -82,18 +88,13 @@ namespace UrunSatisPortali.Controllers
 
             try
             {
-                var newsletter = new Newsletter
-                {
-                    Email = email,
-                    CreatedDate = DateTime.Now
-                };
-
+                var newsletter = new Newsletter { Email = email, CreatedDate = DateTime.Now };
                 _newsletterRepo.Add(newsletter);
-                return Json(new { success = true, message = "Bültenimize baþarýyla abone oldunuz. Teþekkürler!" });
+                return Json(new { success = true, message = "Bültenimize baþarýyla abone oldunuz!" });
             }
             catch (Exception)
             {
-                return Json(new { success = false, message = "Bir hata oluþtu, lütfen daha sonra tekrar deneyiniz." });
+                return Json(new { success = false, message = "Bir hata oluþtu!" });
             }
         }
     }
