@@ -1,48 +1,69 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UrunSatisPortali.Data;
 using UrunSatisPortali.Models;
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json; // JSON serileştirme için gerekli
 
-public class CartController : Controller
+namespace UrunSatisPortali.Controllers
 {
-    private readonly IRepository<Product> _productRepo;
-    // Basitlik olması için sepeti Session yerine statik bir listede tutuyoruz 
-    // (Gerçek projede Veritabanı veya Session tercih edilir)
-    private static List<CartItem> _cart = new List<CartItem>();
-
-    public CartController(IRepository<Product> productRepo)
+    public class CartController : Controller
     {
-        _productRepo = productRepo;
-    }
+        private readonly IRepository<Product> _productRepo;
+        private const string CartSessionKey = "CartSession"; // Session anahtarı
+        private const string CartCountKey = "CartCount";     // Navbar sayacı için anahtar
 
-    public IActionResult Index()
-    {
-        return View(_cart);
-    }
-
-    public IActionResult AddToCart(int id)
-    {
-        var product = _productRepo.GetById(id);
-        if (product != null)
+        public CartController(IRepository<Product> productRepo)
         {
-            var item = _cart.FirstOrDefault(x => x.ProductId == id);
-            if (item != null) item.Quantity++;
-            else _cart.Add(new CartItem { ProductId = id, ProductName = product.Name, Price = product.Price, Quantity = 1 });
+            _productRepo = productRepo;
         }
-        return RedirectToAction("Index");
-    }
 
-    public IActionResult Remove(int id)
-    {
-        _cart.RemoveAll(x => x.ProductId == id);
-        return RedirectToAction("Index");
-    }
-}
+        // Sepet listesini getiren yardımcı metot
+        private List<CartItem> GetCartFromSession()
+        {
+            var jsonStr = HttpContext.Session.GetString(CartSessionKey);
+            return jsonStr == null ? new List<CartItem>() : JsonConvert.DeserializeObject<List<CartItem>>(jsonStr);
+        }
 
-// Yardımcı Model (Models klasörüne de koyabilirsin)
-public class CartItem
-{
-    public int ProductId { get; set; }
-    public string ProductName { get; set; }
-    public decimal Price { get; set; }
-    public int Quantity { get; set; }
+        // Sepeti kaydeden ve sayacı güncelleyen yardımcı metot
+        private void SaveCartToSession(List<CartItem> cart)
+        {
+            var jsonStr = JsonConvert.SerializeObject(cart);
+            HttpContext.Session.SetString(CartSessionKey, jsonStr);
+
+            // NAVBAR SAYACINI GÜNCELLE
+            int totalCount = cart.Sum(x => x.Quantity);
+            HttpContext.Session.SetString(CartCountKey, totalCount.ToString());
+        }
+
+        public IActionResult Index()
+        {
+            return View(GetCartFromSession());
+        }
+
+        public IActionResult AddToCart(int id)
+        {
+            var product = _productRepo.GetById(id);
+            if (product != null)
+            {
+                var cart = GetCartFromSession();
+                var item = cart.FirstOrDefault(x => x.ProductId == id);
+
+                if (item != null) item.Quantity++;
+                else cart.Add(new CartItem { ProductId = id, ProductName = product.Name, Price = product.Price, Quantity = 1 });
+
+                SaveCartToSession(cart);
+            }
+
+            // Sepete ekledikten sonra ana sayfaya dön (Kullanıcı alışverişe devam etsin)
+            return RedirectToAction("Index", "Home");
+        }
+
+        public IActionResult Remove(int id)
+        {
+            var cart = GetCartFromSession();
+            cart.RemoveAll(x => x.ProductId == id);
+            SaveCartToSession(cart);
+            return RedirectToAction("Index");
+        }
+    }
 }

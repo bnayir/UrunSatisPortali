@@ -4,6 +4,13 @@ using UrunSatisPortali.Data;
 using UrunSatisPortali.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
+// 1. BURAYA EKLE: Session servislerini sisteme tanıtıyoruz
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Oturum süresi
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
 
 // 1. VERİTABANI BAĞLANTISI
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -44,7 +51,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseSession();
 // SIRALAMA: Authentication her zaman Authorization'dan önce gelmeli!
 app.UseAuthentication();
 app.UseAuthorization();

@@ -20,3 +20,46 @@ html {
 body {
   margin-bottom: 60px;
 }
+:root {
+    --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --border-radius: 16px;
+}
+
+body {
+    background-color: #f8fafc; /* Daha yumuþak bir gri arka plan */
+    font-family: 'Inter', sans-serif;
+}
+
+/* Kartlarý "Soft" ve Modern Yap */
+.card {
+    border: none !important;
+    border-radius: var(--border-radius) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--glass-bg);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+/* Sidebar'ý Özelleþtir */
+.sidebar {
+    background: #1e293b !important; /* Koyu lacivert/antrasit */
+    border-right: none;
+}
+
+    .sidebar .nav-link {
+        color: #94a3b8;
+        border-radius: 12px;
+        margin: 4px 12px;
+        padding: 12px 16px;
+    }
+
+        .sidebar .nav-link.active {
+            background: var(--primary-gradient) !important;
+            color: white !important;
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+        }
