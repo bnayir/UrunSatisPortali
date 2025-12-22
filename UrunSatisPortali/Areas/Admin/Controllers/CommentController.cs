@@ -4,12 +4,12 @@ using Microsoft.AspNetCore.SignalR;
 using UrunSatisPortali.Data;
 using UrunSatisPortali.Models;
 using UrunSatisPortali.Hubs;
-using System.Security.Claims; // User ID'yi çekmek için gerekli
+using System.Security.Claims;
 
 namespace UrunSatisPortali.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize] // Genel olarak giriş şartı
+    [Authorize]
     public class CommentController : Controller
     {
         private readonly IRepository<Comment> _commentRepo;
@@ -21,27 +21,31 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
             _hubContext = hubContext;
         }
 
-        // --- ADMİN LİSTELEME ---
+        // --- ADMİN LİSTELEME (DEĞERLENDİRME PUANI DAHİL) ---
         [Authorize(Roles = "Admin")]
         public IActionResult Index()
         {
-            var comments = _commentRepo.GetAll("Product,User").OrderByDescending(x => x.CreatedDate).ToList();
+            // Product ve User verilerini dahil ederek listeliyoruz
+            var comments = _commentRepo.GetAll("Product,User")
+                                       .OrderByDescending(x => x.CreatedDate)
+                                       .ToList();
             return View(comments);
         }
 
-        // --- YENİ YORUM EKLEME (BURAYI EKLE) ---
+        // --- YENİ YORUM VE DEĞERLENDİRME EKLEME ---
         [HttpPost]
-        public async Task<IActionResult> AddComment(int productId, string content)
+        public async Task<IActionResult> AddComment(int productId, string content, int rating)
         {
             if (string.IsNullOrWhiteSpace(content))
-                return RedirectToAction("Details", "Product", new { id = productId });
+                return RedirectToAction("Details", "Product", new { area = "", id = productId });
 
             var comment = new Comment
             {
                 ProductId = productId,
-                Content = content, // Senin View tarafındaki ismin: content
+                Content = content,
+                Rating = rating > 0 ? rating : 5, // Gelen puanı kaydediyoruz
                 CreatedDate = DateTime.Now,
-                UserId = User.FindFirstValue(ClaimTypes.NameIdentifier) // Giriş yapan kullanıcının ID'si
+                UserId = User.FindFirstValue(ClaimTypes.NameIdentifier)
             };
 
             _commentRepo.Add(comment);
@@ -50,7 +54,6 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
             var currentCommentCount = _commentRepo.GetAll().Count();
             await _hubContext.Clients.All.SendAsync("ReceiveCommentCount", currentCommentCount);
 
-            // Ürün detay sayfasına geri dön
             return RedirectToAction("Details", "Product", new { area = "", id = productId });
         }
 
@@ -64,6 +67,7 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
 
             _commentRepo.Delete(comment);
 
+            // SİNYAL GÖNDERME: Dashboard'daki sayıyı güncelle
             var currentCommentCount = _commentRepo.GetAll().Count();
             await _hubContext.Clients.All.SendAsync("ReceiveCommentCount", currentCommentCount);
 
