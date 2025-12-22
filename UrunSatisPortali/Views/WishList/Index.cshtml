@@ -1,0 +1,98 @@
+﻿@model IEnumerable<UrunSatisPortali.Models.Product>
+
+<div class="container py-5">
+    @* --- BAŞLIK ALANI --- *@
+    <div class="mb-5 text-center">
+        <h2 class="fw-extra-bold display-5 text-dark">Favori <span class="text-primary text-gradient">Ürünlerim</span></h2>
+        <p class="text-muted">Beğendiğiniz ürünleri buradan takip edebilir ve sepetinize ekleyebilirsiniz.</p>
+        <div class="mx-auto bg-primary rounded-pill" style="width: 60px; height: 4px;"></div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        @* --- BOŞ FAVORİ LİSTESİ DURUMU --- *@
+        <div class="card border-0 shadow-sm rounded-5 p-5 text-center bg-white">
+            <div class="py-5">
+                <i class="fas fa-heart-broken display-1 text-light mb-4"></i>
+                <h3 class="fw-bold">Favori listeniz henüz boş.</h3>
+                <p class="text-muted mb-4">Görünüşe göre henüz hiçbir ürünü kalbinize eklememişsiniz.</p>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm">
+                    Alışverişe Başla
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        @* --- FAVORİ ÜRÜNLER LİSTESİ --- *@
+        <div class="row g-4">
+            @foreach (var item in Model)
+            {
+                <div class="col-md-6 col-lg-4 col-xl-3">
+                    <div class="card h-100 border-0 shadow-sm rounded-4 product-card overflow-hidden bg-white">
+                        <div class="position-relative">
+                            @* Resim *@
+                            <img src="@item.Image" class="card-img-top p-4 rounded-5" alt="@item.Name"
+                                 style="height: 220px; object-fit: contain; transition: 0.5s;">
+
+                            @* Silme Butonu (Sağ Üstte) *@
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <a asp-action="Remove" asp-route-id="@item.Id"
+                                   class="btn btn-light shadow-sm rounded-circle p-2 text-danger"
+                                   title="Favorilerden Kaldır">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="card-body p-4 text-center">
+                            <h6 class="fw-bold mb-2 text-dark text-truncate">@item.Name</h6>
+                            <div class="mb-3">
+                                <span class="h5 fw-extra-bold text-primary">@item.Price.ToString("C2")</span>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <a asp-controller="Cart" asp-action="AddToCart" asp-route-id="@item.Id"
+                                   class="btn btn-primary rounded-pill py-2 fw-bold shadow-sm">
+                                    <i class="fas fa-shopping-cart me-2"></i>Sepete Ekle
+                                </a>
+                                <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id"
+                                   class="btn btn-light rounded-pill py-2 text-muted small border-0">
+                                    İncele
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @* --- TOPLU İŞLEM --- *@
+        <div class="mt-5 text-center">
+            <a asp-controller="Home" asp-action="Index" class="text-decoration-none text-muted fw-bold">
+                <i class="fas fa-arrow-left me-2"></i>Alışverişe Devam Et
+            </a>
+        </div>
+    }
+</div>
+
+<style>
+    .fw-extra-bold {
+        font-weight: 800;
+    }
+
+    .text-gradient {
+        background: linear-gradient(to right, #60a5fa, #3b82f6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .product-card {
+        transition: all 0.3s ease;
+    }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+        }
+</style>

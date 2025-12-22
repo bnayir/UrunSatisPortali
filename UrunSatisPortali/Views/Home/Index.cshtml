@@ -1,7 +1,17 @@
-﻿@model IEnumerable<UrunSatisPortali.Models.Product>
+﻿@using Microsoft.AspNetCore.Http
+@using Newtonsoft.Json
+@model IEnumerable<UrunSatisPortali.Models.Product>
+
+@{
+    // Favori listesini Session'dan çekip ID'lerini bir listeye alıyoruz
+    var wishlistJson = Context.Session.GetString("WishlistSession");
+    var wishlistIds = wishlistJson != null
+        ? JsonConvert.DeserializeObject<List<UrunSatisPortali.Models.Product>>(wishlistJson).Select(x => x.Id).ToList()
+        : new List<int>();
+}
 
 <div class="container py-5">
-    @* --- ÜST BANNER (MODERN GRADIENT) --- *@
+    @* --- ÜST BANNER --- *@
     <div class="position-relative overflow-hidden p-5 mb-5 rounded-5 text-white shadow-lg"
          style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
         <div class="row align-items-center position-relative" style="z-index: 2;">
@@ -20,20 +30,18 @@
     </div>
 
     <div class="row g-4" id="urunler">
-        @* --- SOL FİLTRE PANELİ (DİNAMİK) --- *@
+        @* --- SOL FİLTRE PANELİ --- *@
         <div class="col-lg-3">
             <div class="card border-0 shadow-sm rounded-4 p-3 sticky-top" style="top: 100px;">
                 <h6 class="fw-bold mb-3 d-flex align-items-center">
                     <i class="fas fa-bars-staggered me-2 text-primary"></i>Kategoriler
                 </h6>
                 <div class="nav flex-column nav-pills custom-pills">
-                    @* Tümü Butonu *@
                     <a asp-action="Index" asp-controller="Home"
                        class="nav-link mb-2 rounded-pill text-start @(ViewBag.ActiveCategory == null ? "active" : "text-dark")">
                         <i class="fas fa-border-all me-2"></i>Tümü
                     </a>
 
-                    @* Veritabanından Gelen Kategoriler *@
                     @if (ViewBag.Categories != null)
                     {
                         foreach (var cat in (IEnumerable<UrunSatisPortali.Models.Category>)ViewBag.Categories)
@@ -58,10 +66,28 @@
                             <div class="position-relative">
                                 <img src="@item.Image" class="card-img-top p-4 rounded-5" alt="@item.Name"
                                      style="height: 280px; object-fit: contain; transition: 0.5s;">
+
                                 <div class="badge-overlay position-absolute top-0 end-0 m-3">
                                     <span class="badge bg-white text-dark shadow-sm px-3 py-2 rounded-pill fw-bold">Yeni</span>
                                 </div>
+
+                                @* FAVORİ BUTONU (Dinamik Kalp Kontrolü) *@
+                                <div class="position-absolute top-0 start-0 m-3">
+                                    <a asp-controller="Wishlist" asp-action="AddToWishlist" asp-route-id="@item.Id"
+                                       class="btn btn-white shadow-sm rounded-circle p-2 wishlist-btn"
+                                       style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: white;">
+                                        @if (wishlistIds.Contains(item.Id))
+                                        {
+                                            <i class="fas fa-heart text-danger"></i> @* Dolu Kalp *@
+                                        }
+                                        else
+                                        {
+                                            <i class="far fa-heart text-danger"></i> @* Boş Kalp *@
+                                        }
+                                    </a>
+                                </div>
                             </div>
+
                             <div class="card-body p-4 text-center">
                                 <p class="text-muted small fw-bold mb-1 text-uppercase ls-1">@item.Brand?.Name</p>
                                 <h5 class="fw-bold mb-3 text-dark">@item.Name</h5>
@@ -127,4 +153,12 @@
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
+
+    .wishlist-btn {
+        transition: 0.3s;
+    }
+
+        .wishlist-btn:hover {
+            transform: scale(1.1);
+        }
 </style>

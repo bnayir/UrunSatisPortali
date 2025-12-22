@@ -1,218 +1,253 @@
-﻿@model IEnumerable<UrunSatisPortali.Models.Product>
+﻿@using UrunSatisPortali.Models
+@model IEnumerable<Product>
+
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml"; // Layout yolunu projenle eşleştirdik
+    ViewData["Title"] = "Yönetim Paneli";
+}
 
 <div class="container-fluid pt-4 px-4">
-    @* 1. SATIR: İstatistik Kartları (Modern & Gradient) *@
+    @* --- ÜST ÖZET KARTLARI --- *@
     <div class="row g-4 mb-4">
         <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 rounded-4 shadow-sm" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white;">
-                <div class="card-body d-flex align-items-center justify-content-between p-4">
-                    <i class="fas fa-shopping-cart fa-3x opacity-25"></i>
-                    <div class="text-end">
-                        <p class="mb-1 fw-bold opacity-75 small uppercase">Toplam Ürün</p>
-                        <h2 class="mb-0 fw-bold">@ViewBag.ProductCount</h2>
-                    </div>
+            <div class="card border-0 shadow-sm rounded-4 p-4 d-flex flex-row align-items-center justify-content-between bg-white card-hover">
+                <div class="icon-circle bg-primary-soft text-primary">
+                    <i class="fa fa-chart-line fa-2x"></i>
+                </div>
+                <div class="text-end">
+                    <p class="mb-1 text-muted small fw-bold text-uppercase">Toplam Satış</p>
+                    <h4 class="mb-0 fw-extra-bold text-dark">@ViewBag.TotalSales.ToString("C2")</h4>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 rounded-4 shadow-sm" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
-                <div class="card-body d-flex align-items-center justify-content-between p-4">
-                    <i class="fas fa-th-list fa-3x opacity-25"></i>
-                    <div class="text-end">
-                        <p class="mb-1 fw-bold opacity-75 small uppercase">Kategoriler</p>
-                        <h2 class="mb-0 fw-bold">@ViewBag.CategoryCount</h2>
-                    </div>
+            <div class="card border-0 shadow-sm rounded-4 p-4 d-flex flex-row align-items-center justify-content-between bg-white card-hover">
+                <div class="icon-circle bg-success-soft text-success">
+                    <i class="fa fa-shopping-basket fa-2x"></i>
+                </div>
+                <div class="text-end">
+                    <p class="mb-1 text-muted small fw-bold text-uppercase">Siparişler</p>
+                    <h4 class="mb-0 fw-extra-bold text-dark">@ViewBag.OrderCount</h4>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 rounded-4 shadow-sm" style="background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%); color: white;">
-                <div class="card-body d-flex align-items-center justify-content-between p-4">
-                    <i class="fas fa-award fa-3x opacity-25"></i>
-                    <div class="text-end">
-                        <p class="mb-1 fw-bold opacity-75 small uppercase">Markalar</p>
-                        <h2 class="mb-0 fw-bold">@ViewBag.BrandCount</h2>
-                    </div>
+            <div class="card border-0 shadow-sm rounded-4 p-4 d-flex flex-row align-items-center justify-content-between bg-white card-hover">
+                <div class="icon-circle bg-info-soft text-info">
+                    <i class="fa fa-users fa-2x"></i>
+                </div>
+                <div class="text-end">
+                    <p class="mb-1 text-muted small fw-bold text-uppercase">Müşteriler</p>
+                    <h4 class="mb-0 fw-extra-bold text-dark">@ViewBag.UserCount</h4>
                 </div>
             </div>
         </div>
         <div class="col-sm-6 col-xl-3">
-            <div class="card border-0 rounded-4 shadow-sm" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
-                <div class="card-body d-flex align-items-center justify-content-between p-4">
-                    <i class="fas fa-comments fa-3x opacity-25"></i>
-                    <div class="text-end">
-                        <p class="mb-1 fw-bold opacity-75 small uppercase">Yorumlar</p>
-                        <h2 id="commentCount" class="mb-0 fw-bold">@ViewBag.CommentCount</h2>
-                    </div>
+            <div class="card border-0 shadow-sm rounded-4 p-4 d-flex flex-row align-items-center justify-content-between bg-white card-hover">
+                <div class="icon-circle bg-warning-soft text-warning">
+                    <i class="fa fa-envelope fa-2x"></i>
+                </div>
+                <div class="text-end">
+                    <p class="mb-1 text-muted small fw-bold text-uppercase">Yeni Mesaj</p>
+                    <h4 class="mb-0 fw-extra-bold text-warning">@ViewBag.NewMessagesCount</h4>
                 </div>
             </div>
         </div>
     </div>
 
-    @* 2. SATIR: Grafik ve Liste *@
     <div class="row g-4 mb-4">
-        <div class="col-sm-12 col-xl-8">
-            <div class="card border-0 rounded-4 shadow-sm h-100 p-4">
-                <h6 class="mb-4 fw-bold text-dark d-flex align-items-center">
-                    <span class="p-2 bg-primary-soft rounded-3 me-2" style="background: #eef2ff; color: #6366f1;">
-                        <i class="fas fa-chart-pie"></i>
-                    </span> Kategori Dağılım Analizi
-                </h6>
-                <canvas id="categoryChart" style="max-height: 250px;"></canvas>
+        @* --- GRAFİK ALANI: KATEGORİ DAĞILIMI --- *@
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-chart-pie me-2 text-primary"></i>Kategori Bazlı Ürün Dağılımı</h6>
+                </div>
+                <div class="chart-area" style="height: 300px;">
+                    <canvas id="categoryChart"></canvas> @* ID burası ile eşleşmeli *@
+                </div>
             </div>
         </div>
-        <div class="col-sm-12 col-xl-4">
-            <div class="card border-0 rounded-4 shadow-sm h-100 p-4 overflow-auto" style="max-height: 400px;">
-                <h6 class="mb-4 fw-bold text-dark d-flex align-items-center">
-                    <span class="p-2 bg-success-soft rounded-3 me-2" style="background: #ecfdf5; color: #10b981;">
-                        <i class="fas fa-history"></i>
-                    </span> Son Eklenenler
-                </h6>
-                <table class="table table-hover table-borderless">
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td class="fw-semibold text-dark py-2">@item.Name</td>
-                                <td class="text-end text-primary fw-bold">@item.Price.ToString("N2") ₺</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+
+        @* --- HIZLI ANALİZ: EN POPÜLER ÜRÜNLER --- *@
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <h6 class="mb-4 fw-bold text-dark"><i class="fas fa-fire me-2 text-danger"></i>En Popüler 5 Ürün</h6>
+                <div class="list-group list-group-flush">
+                    @foreach (var item in (dynamic)ViewBag.TopProducts)
+                    {
+                        <div class="list-group-item bg-transparent border-0 px-0 mb-3 d-flex align-items-center">
+                            <div class="rounded-3 bg-light p-2 me-3" style="width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-box text-muted"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0 small fw-bold text-dark">@item.Name</h6>
+                                <span class="text-muted" style="font-size: 0.7rem;">@item.TotalSales Satış</span>
+                            </div>
+                            <span class="badge bg-primary-soft text-primary rounded-pill small">@item.Price.ToString("C0")</span>
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     </div>
 
-    @* 3. SATIR: En Çok Satanlar & Satış Analizi *@
-    <div class="row g-4 mb-4">
-        <div class="col-sm-12 col-xl-7">
-            <div class="card border-0 rounded-4 shadow-sm p-4 overflow-auto" style="min-height: 400px;">
-                <h6 class="mb-4 fw-bold text-dark d-flex align-items-center">
-                    <span class="p-2 bg-warning-soft rounded-3 me-2" style="background: #fffbeb; color: #f59e0b;">
-                        <i class="fas fa-trophy"></i>
-                    </span> En Çok Satan Ürünler
-                </h6>
-                <table class="table align-middle">
-                    <thead class="text-muted small uppercase">
-                        <tr>
-                            <th>Ürün</th>
-                            <th>Satış</th>
-                            <th>Stok</th>
-                            <th>Durum</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in ViewBag.TopProducts)
-                        {
-                            <tr>
-                                <td class="fw-bold">@item.Name</td>
-                                <td><span class="badge rounded-pill" style="background: #d1e7dd; color: #065f46;">@item.TotalSales Adet</span></td>
-                                <td class="text-muted">@item.Stock</td>
-                                <td>
-                                    @if (item.Stock < 10)
-                                    {
-                                        <span class="badge bg-danger-soft text-danger px-3 py-2 rounded-pill" style="background: #fee2e2;">Kritik</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-success-soft text-success px-3 py-2 rounded-pill" style="background: #d1e7dd;">Yeterli</span>
-                                    }
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+    <div class="row g-4">
+        @* --- SON GELEN 5 MESAJ --- *@
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h6 class="mb-0 fw-bold text-dark"><i class="fas fa-envelope-open-text me-2 text-primary"></i>Son Mesajlar</h6>
+                    <a asp-area="Admin" asp-controller="Message" asp-action="Index" class="btn btn-sm btn-light rounded-pill px-3 fw-bold small">Tümünü Gör</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <tbody>
+                            @foreach (var msg in (IEnumerable<Message>)ViewBag.RecentMessages)
+                            {
+                                <tr>
+                                    <td style="width: 45px;">
+                                        <div class="avatar-letter bg-primary text-white rounded-circle">@msg.Name.Substring(0, 1).ToUpper()</div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold text-dark small">@msg.Name</div>
+                                        <div class="text-muted text-truncate" style="font-size: 0.75rem; max-width: 200px;">@msg.Subject</div>
+                                    </td>
+                                    <td class="text-end">
+                                        <span class="badge bg-light text-muted fw-normal">@msg.CreatedDate.ToShortDateString()</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-        <div class="col-sm-12 col-xl-5">
-            <div class="card border-0 rounded-4 shadow-sm p-4 h-100">
-                <h6 class="mb-4 fw-bold text-dark d-flex align-items-center">
-                    <span class="p-2 bg-info-soft rounded-3 me-2" style="background: #e0f2fe; color: #0ea5e9;">
-                        <i class="fas fa-chart-bar"></i>
-                    </span> Kategori Bazlı Satış
-                </h6>
-                <canvas id="salesChart"></canvas>
+
+        @* --- SİSTEM DURUMU --- *@
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <h6 class="mb-4 fw-bold text-dark"><i class="fas fa-server me-2 text-primary"></i>Sistem & Stok Durumu</h6>
+                <div class="d-grid gap-4">
+                    <div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="small fw-bold">Toplam Stok Kapasitesi</span>
+                            <span class="small text-primary fw-bold">%85</span>
+                        </div>
+                        <div class="progress rounded-pill" style="height: 8px;">
+                            <div class="progress-bar bg-primary shadow-sm" style="width: 85%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="small fw-bold">Aylık Satış Hedefi</span>
+                            <span class="small text-success fw-bold">%60</span>
+                        </div>
+                        <div class="progress rounded-pill" style="height: 8px;">
+                            <div class="progress-bar bg-success shadow-sm" style="width: 60%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 p-3 rounded-4 bg-light border border-dashed text-center">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <div class="spinner-grow spinner-grow-sm text-success me-2"></div>
+                        <span class="small text-muted fw-bold">Sistem Çevrimiçi: <span class="text-success">Sorunsuz</span></span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<style>
-    body {
-        background-color: #f1f5f9;
-    }
-
-    .card {
-        transition: transform 0.3s;
-    }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-    .badge {
-        font-weight: 600;
-    }
-</style>
-
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="/lib/microsoft/signalr/dist/browser/signalr.js"></script>
-
     <script>
-        // 1. Doughnut Chart
-        new Chart(document.getElementById('categoryChart'), {
+        // Grafik kimliğini (ID) doğru eşleştirdik
+        var ctx = document.getElementById("categoryChart");
+
+        var myChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
                 labels: @Html.Raw(Json.Serialize(ViewBag.CategoryLabels)),
                 datasets: [{
                     data: @Html.Raw(Json.Serialize(ViewBag.CategoryCounts)),
-                    backgroundColor: ['#6366f1', '#10b981', '#0ea5e9', '#f59e0b', '#ef4444'],
-                    borderWidth: 0,
-                    hoverOffset: 20
-                }]
+                    // Her kategori için farklı renkler
+                    backgroundColor: [
+                        '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796', '#5a5c69'
+                    ],
+                    hoverBackgroundColor: [
+                        '#2e59d9', '#17a673', '#2c9faf', '#dda20a', '#be2617', '#60616f', '#373840'
+                    ],
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                    borderWidth: 1
+                }],
             },
-            options: { cutout: '80%', plugins: { legend: { position: 'bottom', labels: { padding: 20, usePointStyle: true } } } }
-        });
-
-        // 2. Bar Chart
-        new Chart(document.getElementById('salesChart'), {
-            type: 'bar',
-            data: {
-                labels: @Html.Raw(Json.Serialize(ViewBag.CategorySalesLabels)),
-                datasets: [{
-                    label: 'Satış',
-                    data: @Html.Raw(Json.Serialize(ViewBag.CategorySalesCounts)),
-                    backgroundColor: '#6366f1',
-                    borderRadius: 8
-                }]
-            },
-            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } } }
-        });
-
-        // 3. SignalR
-        const connection = new signalR.HubConnectionBuilder().withUrl("/dashboardHub").build();
-        connection.on("ReceiveCommentCount", (count) => {
-            const counter = document.getElementById("commentCount");
-            if (counter) {
-                counter.innerText = count;
-                counter.style.transform = "scale(1.2)";
-                setTimeout(() => counter.style.transform = "scale(1)", 500);
+            options: {
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    }
+                },
+                cutout: '70%' // Ortasını biraz daha genişletip şık gösterdik
             }
-            Swal.fire({ toast: true, position: 'top-end', icon: 'info', title: 'Yeni yorum!', showConfirmButton: false, timer: 3000 });
         });
-        connection.start().catch(err => console.error(err));
-
-        // 4. Stok Uyarıları
-        @foreach (var item in ViewBag.TopProducts)
-        {
-                if (item.Stock < 5)
-                {
-                        <text>
-                        Swal.fire({ toast: true, position: 'bottom-end', icon: 'warning', title: '@item.Name stok kritik!', showConfirmButton: false, timer: 4000 });
-                        </text>
-                }
-        }
     </script>
 }
+
+<style>
+    .fw-extra-bold {
+        font-weight: 800;
+    }
+
+    .card-hover {
+        transition: transform 0.3s ease;
+    }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+        }
+
+    .icon-circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .bg-primary-soft {
+        background-color: #eef2ff;
+    }
+
+    .bg-success-soft {
+        background-color: #ecfdf5;
+    }
+
+    .bg-info-soft {
+        background-color: #e0f2fe;
+    }
+
+    .bg-warning-soft {
+        background-color: #fffbeb;
+    }
+
+    .avatar-letter {
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+
+    .border-dashed {
+        border-style: dashed !important;
+    }
+</style>

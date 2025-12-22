@@ -45,7 +45,7 @@
                 transform: translateY(-1px);
             }
 
-        /* Sepet Sayacı (Dinamik Balon) */
+        /* Dinamik Sayacı (Badge) Stili */
         .cart-badge {
             font-size: 0.7rem;
             min-width: 18px;
@@ -65,6 +65,23 @@
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             border: none;
             box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        }
+
+        /* Sayfa geçiş animasyonu */
+        main {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
@@ -87,6 +104,11 @@
                                 <i class="fas fa-home me-1 opacity-50"></i> Anasayfa
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Contact" asp-action="Index">
+                                <i class="fas fa-envelope me-1 opacity-50"></i> İletişim
+                            </a>
+                        </li>
 
                         @if (SignInManager.IsSignedIn(User))
                         {
@@ -107,10 +129,18 @@
                         }
                     </ul>
 
-                    <ul class="navbar-nav align-items-center">
-                        @* --- DİNAMİSE EDİLMİŞ SEPET LİNKİ --- *@
+                    <ul class="navbar-nav align-items-center text-center text-lg-start">
+                        @* --- FAVORİLER --- *@
+                        <li class="nav-item me-lg-2">
+                            <a class="nav-link d-flex align-items-center justify-content-center" asp-controller="Wishlist" asp-action="Index">
+                                <i class="fas fa-heart text-danger me-1"></i>
+                                <span class="d-none d-xl-inline small fw-bold">Favorilerim</span>
+                            </a>
+                        </li>
+
+                        @* --- SEPET --- *@
                         <li class="nav-item me-lg-3">
-                            <a class="nav-link position-relative d-flex align-items-center bg-light rounded-pill px-3"
+                            <a class="nav-link position-relative d-flex align-items-center justify-content-center bg-light rounded-pill px-3"
                                asp-controller="Cart" asp-action="Index" style="height: 40px;">
                                 <i class="fas fa-shopping-cart text-primary"></i>
                                 <span class="cart-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm">
@@ -123,18 +153,18 @@
                         @if (SignInManager.IsSignedIn(User))
                         {
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle bg-white border rounded-pill px-3 d-flex align-items-center shadow-sm"
+                                <a class="nav-link dropdown-toggle bg-white border rounded-pill px-3 d-flex align-items-center shadow-sm justify-content-center"
                                    href="#" id="userDrop" data-bs-toggle="dropdown" style="height: 40px;">
                                     <img src="https://ui-avatars.com/api/?name=@User.Identity?.Name&background=3b82f6&color=fff"
                                          class="rounded-circle me-2" width="24" height="24">
                                     <span class="small fw-bold">@User.Identity?.Name</span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                                    <li><a class="dropdown-item py-2" asp-area="Identity" asp-page="/Account/Manage/Index"><i class="fas fa-cog me-2 opacity-50"></i>Profil Ayarları</a></li>
+                                    <li><a class="dropdown-item py-2" asp-area="Identity" asp-page="/Account/Manage/Index"><i class="fas fa-user-circle me-2 opacity-50"></i>Profilim</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post">
-                                            <button type="submit" class="dropdown-item text-danger py-2"><i class="fas fa-sign-out-alt me-2"></i>Güvenli Çıkış</button>
+                                            <button type="submit" class="dropdown-item text-danger py-2"><i class="fas fa-power-off me-2"></i> Çıkış Yap</button>
                                         </form>
                                     </li>
                                 </ul>
@@ -155,21 +185,28 @@
         </nav>
     </header>
 
-    <main role="main">
+    <main role="main" class="flex-shrink-0">
         @RenderBody()
     </main>
 
     <footer class="bg-white border-top py-5 mt-auto">
-        <div class="container text-center">
+        <div class="container text-center text-md-start">
             <div class="row align-items-center">
-                <div class="col-md-4 text-md-start mb-3 mb-md-0">
+                <div class="col-md-4 mb-3 mb-md-0 text-center text-md-start">
                     <h5 class="fw-bold text-primary mb-0"><i class="fas fa-magic me-2"></i>KOZMETİK PORTALI</h5>
+                    <p class="small text-muted mt-2">Güzelliğin teknoloji ile buluştuğu nokta.</p>
                 </div>
-                <div class="col-md-4 mb-3 mb-md-0 text-muted small">
-                    &copy; 2025 - Tüm Hakları Saklıdır.
+                <div class="col-md-4 mb-3 mb-md-0 text-center text-muted small">
+                    &copy; 2025 - Tüm Hakları Saklıdır.<br>
+                    <span class="text-primary fw-bold">Kozmetik Dünyası Geliştirici Ekibi</span>
                 </div>
-                <div class="col-md-4 text-md-end">
-                    <span class="badge bg-light text-muted border px-3 py-2 rounded-pill">Final Projesi v1.2</span>
+                <div class="col-md-4 text-center text-md-end">
+                    <div class="social-links mb-3">
+                        <a href="#" class="text-muted me-3 fs-5"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-muted me-3 fs-5"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-muted fs-5"><i class="fab fa-twitter"></i></a>
+                    </div>
+                    <span class="badge bg-light text-muted border px-3 py-2 rounded-pill">Sürüm 1.2.5 - Final</span>
                 </div>
             </div>
         </div>

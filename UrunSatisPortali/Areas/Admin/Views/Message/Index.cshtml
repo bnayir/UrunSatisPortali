@@ -1,0 +1,49 @@
+﻿@model IEnumerable<UrunSatisPortali.Models.Message>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml"; // Kendi Admin Layout yolun
+    ViewData["Title"] = "Mesaj Yönetimi";
+}
+
+<div class="container-fluid pt-4 px-4">
+    <div class="bg-white rounded-4 shadow-sm p-4">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h5 class="fw-bold mb-0 text-dark"><i class="fas fa-envelope-open-text me-2 text-primary"></i>Gelen Mesajlar</h5>
+            <span class="badge bg-primary rounded-pill px-3">Toplam: @Model.Count()</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="bg-light">
+                    <tr class="text-muted small uppercase">
+                        <th>Gönderen</th>
+                        <th>Konu</th>
+                        <th>Mesaj İçeriği</th>
+                        <th>Tarih</th>
+                        <th class="text-end">İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <div class="fw-bold text-dark">@item.Name</div>
+                                <div class="small text-muted">@item.Email</div>
+                            </td>
+                            <td><span class="badge bg-light text-dark fw-bold">@item.Subject</span></td>
+                            <td class="small text-muted" style="max-width: 300px;">@item.Content</td>
+                            <td class="small">@item.CreatedDate.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td class="text-end">
+                                <a asp-action="Delete" asp-route-id="@item.Id"
+                                   class="btn btn-sm btn-outline-danger rounded-pill px-3"
+                                   onclick="return confirm('Bu mesajı silmek istediğinize emin misiniz?')">
+                                    <i class="fas fa-trash-alt me-1"></i> Sil
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
