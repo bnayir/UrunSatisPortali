@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR; // SignalR için gerekli
 using UrunSatisPortali.Data;
 using UrunSatisPortali.Models;
+using UrunSatisPortali.Hubs; // GeneralHub'ın bulunduğu klasör
 
 namespace UrunSatisPortali.Areas.Admin.Controllers
 {
@@ -11,27 +13,37 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
     {
         private readonly IRepository<Category> _categoryRepo;
         private readonly IRepository<Product> _productRepo;
-        public CategoryController(IRepository<Category> categoryRepo, IRepository<Product> productRepo)
+        private readonly IHubContext<GeneralHub> _hubContext; // SignalR Bağlantısı
+
+        public CategoryController(IRepository<Category> categoryRepo, IRepository<Product> productRepo, IHubContext<GeneralHub> hubContext)
         {
             _categoryRepo = categoryRepo;
             _productRepo = productRepo;
+            _hubContext = hubContext;
         }
+
         public ActionResult Index()
         {
             var categories = _categoryRepo.GetAll();
             return View(categories);
         }
+
         public ActionResult Create()
         {
             return View();
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Create(Category category)
+        public async Task<IActionResult> Create(Category category) // async eklendi
         {
             if (ModelState.IsValid)
             {
                 _categoryRepo.Add(category);
+
+                // --- SIGNALR TETİKLEME ---
+                await _hubContext.Clients.All.SendAsync("onCategoryAdd", "Yeni bir kategori eklendi: " + category.Name);
+
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
@@ -49,20 +61,23 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(Category category)
+        public async Task<IActionResult> Edit(Category category) // async eklendi
         {
             if (ModelState.IsValid)
             {
                 category.UpdatedDate = DateTime.Now;
                 _categoryRepo.Update(category);
+
+                // --- SIGNALR TETİKLEME ---
+                await _hubContext.Clients.All.SendAsync("onCategoryUpdate", "Kategori güncellendi: " + category.Name);
+
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
         }
 
-
         [HttpPost]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id) // async eklendi
         {
             bool hasProducts = _productRepo.GetAll().Any(p => p.CategoryId == id);
 
@@ -79,8 +94,10 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
 
             _categoryRepo.Delete(category);
 
+            // --- SIGNALR TETİKLEME ---
+            await _hubContext.Clients.All.SendAsync("onCategoryDelete", "Kategori başarıyla silindi.");
+
             return Json(new { success = true, message = "Kategori başarıyla silindi." });
         }
-
     }
 }

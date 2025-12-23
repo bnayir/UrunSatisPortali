@@ -58,8 +58,8 @@ app.UseAuthorization();
 
 // 5. SIGNALR HUB EŞLEŞTİRMESİ
 // Buradaki "/dashboardHub" ismi JS tarafındaki withUrl("/dashboardHub") ile aynı olmalı.
-app.MapHub<DashboardHub>("/dashboardHub");
-
+// Program.cs içinde MapHub satırını buna göre güncelle:
+app.MapHub<GeneralHub>("/general-hub");
 // 6. ROTALAR
 app.MapRazorPages();
 

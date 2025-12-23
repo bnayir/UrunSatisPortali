@@ -16,11 +16,11 @@ namespace UrunSatisPortali.Controllers
     {
         private readonly IRepository<Product> _productRepo;
         private readonly IRepository<Order> _orderRepo;
-        private readonly IHubContext<DashboardHub> _hubContext;
+        private readonly IHubContext<GeneralHub> _hubContext;
         private const string CartSessionKey = "CartSession";
         private const string CartCountKey = "CartCount";
 
-        public CartController(IRepository<Product> productRepo, IRepository<Order> orderRepo, IHubContext<DashboardHub> hubContext)
+        public CartController(IRepository<Product> productRepo, IRepository<Order> orderRepo, IHubContext<GeneralHub> hubContext)
         {
             _productRepo = productRepo;
             _orderRepo = orderRepo;
@@ -134,12 +134,11 @@ namespace UrunSatisPortali.Controllers
             HttpContext.Session.Remove(CartCountKey);
 
             // 3. SIGNALR TETİKLEMESİ: Admin Paneline Anlık Haber Ver
-            var currentOrderCount = _orderRepo.GetAll().Count();
-            var currentTotalSales = _orderRepo.GetAll().Sum(x => x.TotalPrice).ToString("C2");
+            // CartController.cs içindeki ilgili satırları bu şekilde güncelle:
+            var orderCount = _orderRepo.GetAll().Count();
+            var totalSales = _orderRepo.GetAll().Sum(x => x.TotalPrice);
 
-            // Admin sayfasındaki JavaScript "ReceiveOrderUpdate" fonksiyonunu tetikler
-            await _hubContext.Clients.All.SendAsync("ReceiveOrderUpdate", currentOrderCount, currentTotalSales);
-
+            await _hubContext.Clients.All.SendAsync("receiveOrderUpdate", orderCount, totalSales);
             return RedirectToAction("Index", "Order");
         }
     }

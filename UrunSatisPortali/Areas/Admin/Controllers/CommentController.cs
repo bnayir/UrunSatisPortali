@@ -13,9 +13,9 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
     public class CommentController : Controller
     {
         private readonly IRepository<Comment> _commentRepo;
-        private readonly IHubContext<DashboardHub> _hubContext;
+        private readonly IHubContext<GeneralHub> _hubContext;
 
-        public CommentController(IRepository<Comment> commentRepo, IHubContext<DashboardHub> hubContext)
+        public CommentController(IRepository<Comment> commentRepo, IHubContext<GeneralHub> hubContext)
         {
             _commentRepo = commentRepo;
             _hubContext = hubContext;

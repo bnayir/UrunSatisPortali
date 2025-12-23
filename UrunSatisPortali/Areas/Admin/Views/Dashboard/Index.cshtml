@@ -5,6 +5,7 @@
     Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Yönetim Paneli";
 
+    // Verileri güvenli bir şekilde alıyoruz
     var totalSales = ViewBag.TotalSales ?? 0.0;
     var orderCount = ViewBag.OrderCount ?? 0;
     var userCount = ViewBag.UserCount ?? 0;
@@ -12,6 +13,7 @@
 }
 
 <div class="container-fluid pt-4 px-4">
+    @* --- ÜST İSTATİSTİK KARTLARI --- *@
     <div class="row g-4 mb-4">
         <div class="col-sm-6 col-xl-3">
             <div class="card border-0 shadow-sm rounded-4 p-4 d-flex flex-row align-items-center justify-content-between bg-white">
@@ -20,8 +22,7 @@
                 </div>
                 <div class="text-end">
                     <p class="mb-1 text-muted small fw-bold text-uppercase">Toplam Satış</p>
-                    @* ID'ler JavaScript tarafından kontrol edilecek *@
-                    <h4 id="totalSalesText" class="mb-0 fw-bold">@totalSales.ToString("C2")</h4>
+                    <h4 id="totalSalesText" class="mb-0 fw-bold">@string.Format("{0:C2}", totalSales)</h4>
                 </div>
             </div>
         </div>
@@ -61,6 +62,7 @@
     </div>
 
     <div class="row g-4">
+        @* --- KATEGORİ GRAFİĞİ --- *@
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
                 <h6 class="mb-4 fw-bold text-dark"><i class="fas fa-chart-pie me-2 text-primary"></i>Kategori Bazlı Ürün Dağılımı</h6>
@@ -69,14 +71,15 @@
                 </div>
             </div>
         </div>
+        @* --- SİSTEM DURUMU --- *@
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 text-center">
                 <h6 class="mb-4 fw-bold text-dark text-start"><i class="fas fa-server me-2 text-primary"></i>Sistem Durumu</h6>
                 <div class="py-4">
-                    <div class="h1 fw-bold text-primary mb-1">OK</div>
-                    <p class="text-muted small">Sistem SignalR ile izleniyor.</p>
+                    <div id="statusIndicator" class="h1 fw-bold text-primary mb-1">OK</div>
+                    <p class="text-muted small">SignalR bağlantısı aktif.</p>
                     <div class="progress rounded-pill" style="height: 10px;">
-                        <div class="progress-bar bg-primary" style="width: 100%"></div>
+                        <div id="statusBar" class="progress-bar bg-primary" style="width: 100%"></div>
                     </div>
                 </div>
             </div>
@@ -86,54 +89,90 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    @* Sürüm 6.0.1 kullanıyoruz, 8.0 yüklemiyoruz *@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
 
     <script>
-        // Sayfa tamamen yüklendiğinde grafiği ve tüneli başlat
-        window.onload = function() {
+        document.addEventListener("DOMContentLoaded", function() {
 
-            // --- 1. SIGNALR BAĞLANTISI ---
             const connection = new signalR.HubConnectionBuilder()
-                .withUrl("/dashboardHub")
+                .withUrl("/general-hub")
+                .configureLogging(signalR.LogLevel.Information)
                 .build();
 
-            connection.on("ReceiveOrderUpdate", function (newOrderCount, newTotalSales) {
-                // Sayfayı yenilemeden rakamları güncelle
-                const orderEl = document.getElementById("orderCountText");
-                const salesEl = document.getElementById("totalSalesText");
+            // --- A. SATIŞ GÜNCELLEME ---
+            connection.on("receiveOrderUpdate", function (count, sales) {
+                // Sayıları güncelle
+                document.getElementById("orderCountText").innerText = count;
 
-                if (orderEl) orderEl.innerText = newOrderCount;
-                if (salesEl) salesEl.innerText = newTotalSales;
+                // Parayı formatlı yazdır
+                document.getElementById("totalSalesText").innerText = new Intl.NumberFormat('tr-TR', {
+                    style: 'currency', currency: 'TRY'
+                }).format(sales);
 
-                console.log("Anlık Güncelleme Başarılı: " + newOrderCount);
+                animateUpdate(document.getElementById("orderCountText"));
+            });
+
+            // --- B. KATEGORİ EKLEME ---
+            connection.on("onCategoryAdd", function (message) {
+                // Kategori ismini ayıkla
+                const catName = message.split(": ")[1] || "Yeni";
+
+                // Grafiğe yeni dilim ekle
+                categoryChart.data.labels.push(catName);
+                categoryChart.data.datasets[0].data.push(1);
+                categoryChart.update();
+
+                showNotification(message, "success");
+            });
+
+            // --- C. KATEGORİ SİLME ---
+            connection.on("onCategoryDelete", function (message) {
+                // Silme işleminde en doğru veri için grafiği güncellemek yerine
+                // ya sayfayı yenileriz ya da veriyi baştan çekeriz.
+                // Şimdilik bildirim verip 2 saniye sonra sayfayı yenileyelim:
+                showNotification(message + " Veriler güncelleniyor...", "danger");
+                setTimeout(() => { location.reload(); }, 2000);
             });
 
             connection.start()
-                .then(() => console.log("SignalR Bağlantısı Kuruldu."))
-                .catch(err => console.error("SignalR Hatası: " + err.toString()));
-
-            // --- 2. GRAFİK ÇİZİMİ ---
-            const canvas = document.getElementById("categoryChart");
-            if (canvas) {
-                const ctx = canvas.getContext('2d');
-                new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: @Html.Raw(Json.Serialize(ViewBag.CategoryLabels ?? new string[] { "Yükleniyor" })),
-                        datasets: [{
-                            data: @Html.Raw(Json.Serialize(ViewBag.CategoryCounts ?? new int[] { 1 })),
-                            backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b'],
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        maintainAspectRatio: false,
-                        cutout: '70%',
-                        plugins: { legend: { position: 'bottom' } }
-                    }
+                .then(() => {
+                    document.getElementById("statusIndicator").innerText = "ONLINE";
+                    document.getElementById("statusIndicator").style.color = "#198754";
                 });
+
+            // --- GRAFİK TANIMI ---
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            const categoryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: @Html.Raw(Json.Serialize(ViewBag.CategoryLabels ?? new string[] { })),
+                    datasets: [{
+                        data: @Html.Raw(Json.Serialize(ViewBag.CategoryCounts ?? new int[] { })),
+                        backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { maintainAspectRatio: false, cutout: '75%' }
+            });
+
+            function showNotification(msg, type) {
+                // Varsa bildirim divini kullan
+                const notify = document.getElementById("notification");
+                if(notify) {
+                    notify.innerText = msg;
+                    notify.className = "alert alert-" + type;
+                    notify.style.display = "block";
+                    setTimeout(() => { notify.style.display = "none"; }, 4000);
+                }
             }
-        };
+
+            function animateUpdate(el) {
+                el.classList.add("text-primary");
+                setTimeout(() => el.classList.remove("text-primary"), 1000);
+            }
+        });
     </script>
+}
+}
+}
 }

@@ -180,6 +180,12 @@
                                 <li><a class="dropdown-item fw-bold text-center text-primary" asp-area="" asp-controller="Home" asp-action="Index">Tüm Kategoriler</a></li>
                             </ul>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Contact" asp-action="Index">
+                                <i class="fas fa-envelope me-1 opacity-50"></i> İletişim
+                            </a>
+                        </li>
+
 
                         @if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
                         {
