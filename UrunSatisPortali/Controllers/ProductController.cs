@@ -57,7 +57,7 @@ namespace UrunSatisPortali.Controllers
                 {
                     ProductId = ProductId,
                     Content = Content,
-                    Rating = Rating > 0 ? Rating : 5, // Eğer puan gelmezse varsayılan 5 yap
+                    Rating = Rating > 0 ? Rating : 5, 
                     UserId = userId,
                     CreatedDate = DateTime.Now
                 };

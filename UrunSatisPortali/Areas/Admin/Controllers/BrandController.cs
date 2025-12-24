@@ -6,7 +6,7 @@ using UrunSatisPortali.Models;
 namespace UrunSatisPortali.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize(Roles = "Admin")] // Sadece admin erişebilir
+    [Authorize(Roles = "Admin")] 
     public class BrandController : Controller
     {
         private readonly IRepository<Brand> _brandRepo;

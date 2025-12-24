@@ -5,7 +5,6 @@ namespace UrunSatisPortali.Controllers
 {
     public class AccountController : Controller
     {
-        // Identity sisteminin asıl yöneticisi SignInManager'dır
         private readonly SignInManager<IdentityUser> _signInManager;
 
         public AccountController(SignInManager<IdentityUser> signInManager)
@@ -34,7 +33,6 @@ namespace UrunSatisPortali.Controllers
             return View();
         }
 
-        // BU KISIM HATAYI ÇÖZER: MyCookieAuth yerine Identity metodunu kullanıyoruz
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();

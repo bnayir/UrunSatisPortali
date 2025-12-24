@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR; // SignalR için gerekli
+using Microsoft.AspNetCore.SignalR; 
 using UrunSatisPortali.Data;
 using UrunSatisPortali.Models;
-using UrunSatisPortali.Hubs; // GeneralHub'ın bulunduğu klasör
+using UrunSatisPortali.Hubs; 
 
 namespace UrunSatisPortali.Areas.Admin.Controllers
 {
@@ -35,7 +35,7 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Category category) // async eklendi
+        public async Task<IActionResult> Create(Category category) 
         {
             if (ModelState.IsValid)
             {
@@ -61,7 +61,7 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Category category) // async eklendi
+        public async Task<IActionResult> Edit(Category category) 
         {
             if (ModelState.IsValid)
             {
@@ -77,7 +77,7 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int id) // async eklendi
+        public async Task<IActionResult> Delete(int id) 
         {
             bool hasProducts = _productRepo.GetAll().Any(p => p.CategoryId == id);
 

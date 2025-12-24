@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation; // GEREKLİ: ValidateNever için
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation; 
 using UrunSatisPortali.Data;
 using UrunSatisPortali.Models;
 
@@ -39,8 +39,6 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Create(Product product)
         {
-            // İPUCU: Eğer buton hala çalışmıyorsa, ModelState içindeki 
-            // 'Category' ve 'Brand' nesne hatalarını manuel siliyoruz.
             ModelState.Remove("Category");
             ModelState.Remove("Brand");
 

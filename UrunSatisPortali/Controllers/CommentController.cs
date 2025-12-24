@@ -6,7 +6,6 @@ using UrunSatisPortali.Data;
 using UrunSatisPortali.Models;
 using UrunSatisPortali.Hubs;
 
-// Namespace'in başına dikkat et, Admin olanla karışmasın
 namespace UrunSatisPortali.Controllers
 {
     [Authorize]
@@ -22,7 +21,7 @@ namespace UrunSatisPortali.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken] // Güvenlik için ekle (Finalde puan kazandırır)
+        [ValidateAntiForgeryToken] 
         public async Task<IActionResult> AddComment(int productId, string content)
         {
             if (string.IsNullOrWhiteSpace(content))
@@ -30,7 +29,7 @@ namespace UrunSatisPortali.Controllers
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (userId == null) return Challenge(); // Kullanıcı ID alınamazsa tekrar girişe at
+            if (userId == null) return Challenge(); 
 
             var comment = new Comment
             {
@@ -46,7 +45,6 @@ namespace UrunSatisPortali.Controllers
             var currentCount = _commentRepo.GetAll().Count();
             await _hubContext.Clients.All.SendAsync("ReceiveCommentCount", currentCount);
 
-            // ÖNEMLİ: Product Details sayfasının 'Area'sı olmadığı için explicit belirtiyoruz
             return RedirectToAction("Details", "Product", new { area = "", id = productId });
         }
     }

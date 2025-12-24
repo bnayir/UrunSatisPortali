@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity; // Eklendi
+using Microsoft.AspNetCore.Identity; 
 using UrunSatisPortali.Data;
 using UrunSatisPortali.Models;
 
@@ -14,8 +14,8 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
         private readonly IRepository<Category> _categoryRepo;
         private readonly IRepository<Brand> _brandRepo;
         private readonly IRepository<Message> _messageRepo;
-        private readonly IRepository<Order> _orderRepo; // Sipariş tablosu eklendi
-        private readonly UserManager<IdentityUser> _userManager; // Müşteri sayısı için
+        private readonly IRepository<Order> _orderRepo; 
+        private readonly UserManager<IdentityUser> _userManager; 
 
         public DashboardController(
             IRepository<Product> productRepo,
@@ -38,9 +38,9 @@ namespace UrunSatisPortali.Areas.Admin.Controllers
             // 1. ÜST KART İSTATİSTİKLERİ (GERÇEK VERİLER)
             var orders = _orderRepo.GetAll()?.ToList() ?? new List<Order>();
 
-            ViewBag.TotalSales = orders.Sum(x => x.TotalPrice); // Sahte 12500 silindi, gerçek toplam geldi
-            ViewBag.OrderCount = orders.Count; // Gerçek sipariş sayısı
-            ViewBag.UserCount = _userManager.Users.Count(); // Gerçek kayıtlı müşteri sayısı
+            ViewBag.TotalSales = orders.Sum(x => x.TotalPrice); 
+            ViewBag.OrderCount = orders.Count; 
+            ViewBag.UserCount = _userManager.Users.Count(); 
             ViewBag.ProductCount = _productRepo.GetAll()?.Count() ?? 0;
 
             // 2. MESAJLAR

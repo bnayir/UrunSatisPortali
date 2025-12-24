@@ -20,7 +20,6 @@ namespace UrunSatisPortali.Controllers
             _newsletterRepo = newsletterRepo;
         }
 
-        // --- TEK BÝR INDEX METODUNDA ARAMA VE KATEGORÝ BÝRLEÞTÝRÝLDÝ ---
         public IActionResult Index(int? categoryId, string searchString)
         {
             // 1. Ana Ürün Sorgusu (Ýliþkili tablolarla birlikte)

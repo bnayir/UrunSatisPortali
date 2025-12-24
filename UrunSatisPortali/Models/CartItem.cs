@@ -4,8 +4,6 @@
     {
         public int ProductId { get; set; }
 
-        // HATALI SATIR DÜZELTİLDİ: 'string' ifadesi kaldırıldı.
-        // Artık bu özellik 'Product' tipindeki tüm nesneye erişebilir.
         public Product Product { get; set; }
 
         public decimal Price { get; set; }

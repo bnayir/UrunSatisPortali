@@ -116,15 +116,12 @@ public class OrderController : Controller
         // Durumu güncelliyoruz
         order.Status = status;
 
-        // EĞER REPOSITORY KAYDETMİYORSA, BURADA ZORLA KAYDETTİRELİM:
         try
         {
             _orderRepo.Update(order);
-            // Eğer repository içindeki SaveChanges çalışmıyorsa buraya bir log/hata düşer.
         }
         catch (Exception ex)
         {
-            // Hata varsa burada durdurup bakabilirsin
             return BadRequest(ex.Message);
         }
 

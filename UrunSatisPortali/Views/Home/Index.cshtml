@@ -3,7 +3,6 @@
 @model IEnumerable<UrunSatisPortali.Models.Product>
 
 @{
-    // Favori kontrolü için session'dan listeyi alıyoruz
     var wishlistJson = Context.Session.GetString("WishlistSession");
     var wishlistIds = wishlistJson != null
         ? JsonConvert.DeserializeObject<List<UrunSatisPortali.Models.Product>>(wishlistJson).Select(x => x.Id).ToList()

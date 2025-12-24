@@ -1,10 +1,9 @@
 ﻿using System.Linq.Expressions;
 
-namespace UrunSatisPortali.Data // Namespace ismine dikkat et, sende farklıysa düzelt
+namespace UrunSatisPortali.Data 
 {
     public interface IRepository<T> where T : class
     {
-        // ARTIK PARANTEZ İÇİNDE STRING PARAMETRE ALABİLİYOR
         IEnumerable<T> GetAll(string? includeProps = null);
 
         T GetById(int id);

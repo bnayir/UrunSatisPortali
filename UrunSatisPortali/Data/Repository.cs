@@ -49,7 +49,6 @@ namespace UrunSatisPortali.Data
             return dbSet.Find(id);
         }
 
-        // --- DÜZELTİLEN GÜNCELLEME METODU ---
         public void Update(T entity)
         {
             // Değişken isimleri sınıfın üst kısmındaki tanımlarla eşitlendi

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Identity; // IdentityUser için gerekli
+using Microsoft.AspNetCore.Identity; 
 
 namespace UrunSatisPortali.Models
 {
@@ -11,7 +11,6 @@ namespace UrunSatisPortali.Models
         // --- KULLANICI İLİŞKİSİ ---
         public string UserId { get; set; } // Siparişi veren kullanıcı ID'si
 
-        // Navigation Property: View tarafında @item.User.UserName diyebilmek için bu şarttır.
         public virtual IdentityUser User { get; set; }
 
         public DateTime OrderDate { get; set; }

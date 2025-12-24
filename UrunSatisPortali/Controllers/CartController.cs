@@ -27,7 +27,6 @@ namespace UrunSatisPortali.Controllers
             _hubContext = hubContext;
         }
 
-        // --- YARDIMCI METOTLAR (SESSION İŞLEMLERİ) ---
         private List<CartItem> GetCartFromSession()
         {
             var jsonStr = HttpContext.Session.GetString(CartSessionKey);
@@ -107,7 +106,7 @@ namespace UrunSatisPortali.Controllers
             return RedirectToAction("Index");
         }
 
-        // --- KRİTİK EKLENTİ: SATIN ALMA VE SIGNALR TETİKLEME ---
+        // --- SATIN ALMA VE SIGNALR TETİKLEME ---
         public async Task<IActionResult> Checkout()
         {
             var cart = GetCartFromSession();
@@ -134,7 +133,6 @@ namespace UrunSatisPortali.Controllers
             HttpContext.Session.Remove(CartCountKey);
 
             // 3. SIGNALR TETİKLEMESİ: Admin Paneline Anlık Haber Ver
-            // CartController.cs içindeki ilgili satırları bu şekilde güncelle:
             var orderCount = _orderRepo.GetAll().Count();
             var totalSales = _orderRepo.GetAll().Sum(x => x.TotalPrice);
 

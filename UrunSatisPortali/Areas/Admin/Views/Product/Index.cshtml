@@ -114,7 +114,6 @@
                 var btn = $(this);
                 var id = btn.data("id");
 
-                // SweetAlert yerine Klasik ve Güvenli Onay Kutusu
                 if (confirm("Bu ürünü silmek istediğinize emin misiniz?")) {
                     $.ajax({
                         url: "/Admin/Product/Delete/" + id,
