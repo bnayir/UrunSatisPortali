@@ -1,3 +1,10 @@
+<p align="right">
+  <a href="#english-version">🇬🇧 English</a> | 
+  <a href="#türkçe-açıklama">🇹🇷 Türkçe</a>
+</p>
+
+---
+
 #  Product Sales & E-Commerce Portal
 
 > **A comprehensive E-Commerce Solution** built with **.NET Core MVC**, featuring a secure management panel, real-time notifications, and a scalable repository-based architecture.
