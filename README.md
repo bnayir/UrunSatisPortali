@@ -1,6 +1,7 @@
+
+
 <p align="right">
-  <a href="#english-version">🇬🇧 English</a> | 
-  <a href="#türkçe-açıklama">🇹🇷 Türkçe</a>
+  <strong>🇬🇧 English</strong> | <a href="README.tr.md">🇹🇷 Türkçe</a>
 </p>
 
 ---
