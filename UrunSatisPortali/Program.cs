@@ -1,13 +1,12 @@
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using UrunSatisPortali.Data;
 using UrunSatisPortali.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
-// 1. BURAYA EKLE: Session servislerini sisteme tanıtıyoruz
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // Oturum süresi
+    options.IdleTimeout = TimeSpan.FromMinutes(30); 
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
@@ -19,8 +18,6 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// 2. IDENTITY SERVİSLERİ
-// NOT: .AddDefaultIdentity yerine .AddIdentity kullanmak Rol yönetimi (Admin) için bazen daha kararlıdır.
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => {
     options.Password.RequireDigit = false;
     options.Password.RequiredLength = 6;
@@ -30,13 +27,13 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => {
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders()
-.AddDefaultUI(); // Identity ekranlarının (Login/Register) çalışması için şart.
+.AddDefaultUI(); 
 
 // 3. SERVİS KAYITLARI
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
-builder.Services.AddSignalR(); // SignalR servisi eklendi.
+builder.Services.AddSignalR(); 
 
 var app = builder.Build();
 
